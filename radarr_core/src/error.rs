@@ -32,8 +32,8 @@ pub enum Error {
 impl From<sqlx::Error> for Error {
     fn from(err: sqlx::Error) -> Self {
         match err {
-            sqlx::Error::RowNotFound => Error::NotFound("Resource not found".to_string()),
-            _ => Error::Database(err.to_string()),
+            sqlx::Error::RowNotFound => Self::NotFound("Resource not found".to_string()),
+            _ => Self::Database(err.to_string()),
         }
     }
 }

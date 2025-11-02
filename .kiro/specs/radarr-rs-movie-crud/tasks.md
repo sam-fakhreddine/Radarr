@@ -7,29 +7,29 @@
   - Set up database migration directory structure
   - _Requirements: 5.1, 5.2, 5.3_
 
-- [ ] 2. Implement domain models and types
-  - [ ] 2.1 Create MovieStatusType enum with serialization
+- [-] 2. Implement domain models and types
+  - [x] 2.1 Create MovieStatusType enum with serialization
     - Define TBA, Announced, InCinemas, Released variants
     - Implement serde serialization with camelCase
     - Implement sqlx Type trait for database mapping
     - _Requirements: 1.4, 8.5_
-  - [ ] 2.2 Create Ratings and Rating structs
+  - [x] 2.2 Create Ratings and Rating structs
     - Define Rating struct with value and votes fields
     - Define Ratings struct with imdb, tmdb, metacritic, rotten_tomatoes fields
     - Implement JSON serialization/deserialization
     - _Requirements: 1.4, 8.2_
-  - [ ] 2.3 Implement MovieMetadata entity
+  - [x] 2.3 Implement MovieMetadata entity
     - Define all fields matching database schema
     - Implement sqlx::FromRow derivation
     - Add serde serialization with camelCase
     - _Requirements: 1.4, 5.2, 8.2_
-  - [ ] 2.4 Implement Movie entity
+  - [x] 2.4 Implement Movie entity
     - Define all fields matching database schema
     - Implement has_file() method
     - Implement apply_changes() method
     - Add lazy-loaded movie_metadata field
     - _Requirements: 1.4, 3.2, 5.1_
-  - [ ] 2.5 Implement is_available() method on Movie
+  - [x] 2.5 Implement is_available() method on Movie
     - Handle TBA/Announced minimum availability
     - Handle InCinemas minimum availability
     - Handle Released minimum availability with earliest date

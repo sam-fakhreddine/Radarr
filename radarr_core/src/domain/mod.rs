@@ -8,3 +8,8 @@ pub mod movie_metadata;
 
 /// Domain value objects and enums
 pub mod types;
+
+// Re-export commonly used types
+pub use movie::Movie;
+pub use movie_metadata::MovieMetadata;
+pub use types::{MovieStatusType, Rating, Ratings};
