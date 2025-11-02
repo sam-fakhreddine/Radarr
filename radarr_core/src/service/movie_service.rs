@@ -1,8 +1,9 @@
 //! Movie service implementation
 
 use crate::domain::movie::Movie;
+use crate::domain::movie_metadata::MovieMetadata;
 use crate::error::{Error, Result};
-use crate::repository::traits::MovieRepository;
+use crate::repository::traits::{MovieMetadataRepository, MovieRepository};
 use crate::validation;
 use chrono::Utc;
 use std::sync::Arc;
@@ -17,6 +18,7 @@ pub struct Config {
 /// Movie service providing business logic for movie operations
 pub struct MovieService {
     repository: Arc<dyn MovieRepository>,
+    metadata_repository: Arc<dyn MovieMetadataRepository>,
     #[allow(dead_code)]
     config: Arc<Config>,
 }
@@ -27,14 +29,23 @@ impl MovieService {
     /// # Arguments
     ///
     /// * `repository` - The movie repository implementation
+    /// * `metadata_repository` - The movie metadata repository implementation
     /// * `config` - Service configuration
     ///
     /// # Returns
     ///
     /// Returns a new `MovieService` instance
     #[must_use]
-    pub fn new(repository: Arc<dyn MovieRepository>, config: Arc<Config>) -> Self {
-        Self { repository, config }
+    pub fn new(
+        repository: Arc<dyn MovieRepository>,
+        metadata_repository: Arc<dyn MovieMetadataRepository>,
+        config: Arc<Config>,
+    ) -> Self {
+        Self {
+            repository,
+            metadata_repository,
+            config,
+        }
     }
 
     /// Gets a movie by ID
@@ -66,6 +77,68 @@ impl MovieService {
     /// Returns `Error::Database` for database errors
     pub async fn get_all_movies(&self) -> Result<Vec<Movie>> {
         self.repository.all().await
+    }
+
+    /// Adds a new movie to the library with metadata
+    ///
+    /// # Arguments
+    ///
+    /// * `movie` - The movie to add (`movie_metadata_id` will be set based on `tmdb_id`)
+    /// * `tmdb_id` - The TMDB ID to look up or use for metadata
+    /// * `metadata` - Optional metadata to use if not found by TMDB ID
+    ///
+    /// # Returns
+    ///
+    /// Returns the created movie with generated ID and timestamp
+    ///
+    /// # Errors
+    ///
+    /// Returns `Error::Validation` if:
+    /// - Movie already exists (by TMDB ID)
+    /// - Path validation fails
+    /// - Quality profile doesn't exist
+    /// - Metadata not found and not provided
+    ///
+    /// Returns `Error::Database` for database errors
+    pub async fn add_movie_with_metadata(
+        &self,
+        mut movie: Movie,
+        tmdb_id: i32,
+        metadata: Option<MovieMetadata>,
+    ) -> Result<Movie> {
+        // Validate movie fields
+        validation::validate_movie(&movie)?;
+
+        // Check if movie already exists by TMDB ID
+        if let Some(existing) = self.repository.find_by_tmdb_id(tmdb_id).await? {
+            return Err(Error::Validation(format!(
+                "Movie with TMDB ID {tmdb_id} already exists with ID {}",
+                existing.id
+            )));
+        }
+
+        // Look up or create metadata
+        let movie_metadata = if let Some(existing_metadata) =
+            self.metadata_repository.find_by_tmdb_id(tmdb_id).await?
+        {
+            existing_metadata
+        } else if let Some(new_metadata) = metadata {
+            // Insert the provided metadata
+            self.metadata_repository.insert(&new_metadata).await?
+        } else {
+            return Err(Error::Validation(format!(
+                "Movie metadata for TMDB ID {tmdb_id} not found and not provided"
+            )));
+        };
+
+        // Set the movie_metadata_id
+        movie.movie_metadata_id = movie_metadata.id;
+
+        // Set added timestamp to current UTC time
+        movie.added = Utc::now();
+
+        // Insert movie
+        self.repository.insert(&movie).await
     }
 
     /// Adds a new movie to the library
@@ -244,14 +317,18 @@ mod tests {
     // Mock repository for testing
     struct MockMovieRepository {
         movies: Mutex<HashMap<i32, Movie>>,
+        metadata: Mutex<HashMap<i32, MovieMetadata>>,
         next_id: Mutex<i32>,
+        next_metadata_id: Mutex<i32>,
     }
 
     impl MockMovieRepository {
         fn new() -> Self {
             Self {
                 movies: Mutex::new(HashMap::new()),
+                metadata: Mutex::new(HashMap::new()),
                 next_id: Mutex::new(1),
+                next_metadata_id: Mutex::new(1),
             }
         }
 
@@ -268,7 +345,9 @@ mod tests {
 
             Self {
                 movies: Mutex::new(map),
+                metadata: Mutex::new(HashMap::new()),
                 next_id: Mutex::new(max_id + 1),
+                next_metadata_id: Mutex::new(1),
             }
         }
     }
@@ -390,6 +469,33 @@ mod tests {
         }
     }
 
+    use crate::repository::traits::MovieMetadataRepository;
+
+    #[async_trait]
+    impl MovieMetadataRepository for MockMovieRepository {
+        async fn find_by_tmdb_id(&self, tmdb_id: i32) -> Result<Option<MovieMetadata>> {
+            Ok(self
+                .metadata
+                .lock()
+                .expect("Lock poisoned")
+                .values()
+                .find(|m| m.tmdb_id == tmdb_id)
+                .cloned())
+        }
+
+        async fn insert(&self, metadata: &MovieMetadata) -> Result<MovieMetadata> {
+            let mut metadata_guard = self.metadata.lock().expect("Lock poisoned");
+            let mut next_id_guard = self.next_metadata_id.lock().expect("Lock poisoned");
+
+            let mut new_metadata = metadata.clone();
+            new_metadata.id = *next_id_guard;
+            *next_id_guard += 1;
+
+            metadata_guard.insert(new_metadata.id, new_metadata.clone());
+            Ok(new_metadata)
+        }
+    }
+
     fn create_test_movie() -> Movie {
         Movie {
             id: 0,
@@ -442,8 +548,9 @@ mod tests {
         let repo = Arc::new(MockMovieRepository::with_movies(
             vec![movie_with_id.clone()],
         ));
+        let metadata_repo = Arc::new(MockMovieRepository::new());
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let result = service.get_movie(1).await;
         assert!(result.is_ok());
@@ -456,8 +563,9 @@ mod tests {
     #[tokio::test]
     async fn test_get_movie_not_found() {
         let repo = Arc::new(MockMovieRepository::new());
+        let metadata_repo = Arc::new(MockMovieRepository::new());
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let result = service.get_movie(999).await;
         assert!(result.is_err());
@@ -480,7 +588,8 @@ mod tests {
             second_movie,
         ]));
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let result = service.get_all_movies().await;
         assert!(result.is_ok());
@@ -493,7 +602,8 @@ mod tests {
     async fn test_add_movie_success() {
         let repo = Arc::new(MockMovieRepository::new());
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let movie = create_test_movie();
         let result = service.add_movie(movie).await;
@@ -512,7 +622,8 @@ mod tests {
 
         let repo = Arc::new(MockMovieRepository::with_movies(vec![existing_with_id]));
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let new_movie = create_test_movie();
         let result = service.add_movie(new_movie).await;
@@ -531,7 +642,8 @@ mod tests {
             vec![movie_with_id.clone()],
         ));
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let mut changes = movie_with_id.clone();
         changes.path = "/new/path".to_string();
@@ -549,7 +661,8 @@ mod tests {
     async fn test_update_movie_not_found() {
         let repo = Arc::new(MockMovieRepository::new());
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let movie = create_test_movie();
         let result = service.update_movie(999, movie).await;
@@ -566,7 +679,8 @@ mod tests {
 
         let repo = Arc::new(MockMovieRepository::with_movies(vec![movie_with_id]));
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let result = service.delete_movie(1, false, false).await;
         assert!(result.is_ok());
@@ -576,7 +690,8 @@ mod tests {
     async fn test_delete_movie_not_found() {
         let repo = Arc::new(MockMovieRepository::new());
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let result = service.delete_movie(999, false, false).await;
         assert!(result.is_err());
@@ -593,7 +708,8 @@ mod tests {
             vec![movie_with_id.clone()],
         ));
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let result = service.find_by_tmdb_id(27205).await;
         assert!(result.is_ok());
@@ -608,7 +724,8 @@ mod tests {
     async fn test_find_by_tmdb_id_not_found() {
         let repo = Arc::new(MockMovieRepository::new());
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let result = service.find_by_tmdb_id(999).await;
         assert!(result.is_ok());
@@ -626,7 +743,8 @@ mod tests {
             vec![movie_with_id.clone()],
         ));
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let result = service.find_by_path("/movies/Inception (2010)").await;
         assert!(result.is_ok());
@@ -641,7 +759,8 @@ mod tests {
     async fn test_find_by_path_not_found() {
         let repo = Arc::new(MockMovieRepository::new());
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let result = service.find_by_path("/nonexistent/path").await;
         assert!(result.is_ok());
@@ -653,7 +772,8 @@ mod tests {
     async fn test_add_movie_invalid_path() {
         let repo = Arc::new(MockMovieRepository::new());
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let mut movie = create_test_movie();
         movie.path = String::new();
@@ -668,7 +788,8 @@ mod tests {
     async fn test_add_movie_invalid_quality_profile() {
         let repo = Arc::new(MockMovieRepository::new());
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let mut movie = create_test_movie();
         movie.quality_profile_id = 0;
@@ -686,7 +807,8 @@ mod tests {
 
         let repo = Arc::new(MockMovieRepository::with_movies(vec![movie_with_id]));
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let mut updates = create_test_movie();
         updates.path = String::new();
@@ -705,7 +827,8 @@ mod tests {
 
         let repo = Arc::new(MockMovieRepository::with_movies(vec![movie_with_id]));
         let config = Arc::new(Config::default());
-        let service = MovieService::new(repo, config);
+        let metadata_repo = Arc::new(MockMovieRepository::new());
+        let service = MovieService::new(repo, metadata_repo, config);
 
         let mut updates = create_test_movie();
         updates.quality_profile_id = -1;

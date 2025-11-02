@@ -51,7 +51,7 @@ async fn main() -> anyhow::Result<()> {
         .max_connections(5)
         .connect_with(
             sqlx::sqlite::SqliteConnectOptions::new()
-                .filename(&config.database_url.trim_start_matches("sqlite:"))
+                .filename(config.database_url.trim_start_matches("sqlite:"))
                 .create_if_missing(true),
         )
         .await?;
@@ -62,9 +62,15 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("Migrations completed successfully");
 
     // Create repository instance
-    let movie_repository: Arc<dyn radarr_core::repository::traits::MovieRepository> =
+    let repository_impl =
         Arc::new(radarr_core::repository::movie_repository::SqlxMovieRepository::new(pool));
-    tracing::debug!("Movie repository created");
+
+    let movie_repository: Arc<dyn radarr_core::repository::traits::MovieRepository> =
+        repository_impl.clone();
+    let metadata_repository: Arc<dyn radarr_core::repository::traits::MovieMetadataRepository> =
+        repository_impl;
+
+    tracing::debug!("Movie and metadata repositories created");
 
     // Create service configuration
     let service_config = Arc::new(radarr_core::service::movie_service::Config {
@@ -74,6 +80,7 @@ async fn main() -> anyhow::Result<()> {
     // Create service instance
     let movie_service = Arc::new(radarr_core::service::movie_service::MovieService::new(
         movie_repository,
+        metadata_repository,
         service_config,
     ));
     tracing::debug!("Movie service created");

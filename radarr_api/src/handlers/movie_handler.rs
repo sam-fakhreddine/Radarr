@@ -123,11 +123,61 @@ pub async fn create_movie(
         )));
     }
 
+    if resource.tmdb_id <= 0 {
+        return Err(AppError(radarr_core::error::Error::Validation(
+            "Valid tmdbId is required".to_string(),
+        )));
+    }
+
     // Convert resource to movie
     let movie = resource.to_movie();
 
-    // Call service.add_movie
-    let created = service.add_movie(movie).await?;
+    // Create metadata from resource if provided
+    let metadata = if resource.title.is_empty() {
+        None
+    } else {
+        Some(radarr_core::domain::movie_metadata::MovieMetadata {
+            id: 0,
+            tmdb_id: resource.tmdb_id,
+            imdb_id: resource.imdb_id.clone(),
+            title: resource.title.clone(),
+            original_title: resource.original_title.clone(),
+            clean_title: resource.clean_title.clone().unwrap_or_else(|| {
+                resource
+                    .title
+                    .to_lowercase()
+                    .chars()
+                    .filter(|c| c.is_alphanumeric())
+                    .collect()
+            }),
+            sort_title: resource.sort_title.clone(),
+            year: resource.year,
+            status: resource.status,
+            overview: resource.overview.clone(),
+            images: serde_json::to_value(&resource.images)
+                .unwrap_or_else(|_| serde_json::json!([])),
+            genres: serde_json::to_value(&resource.genres)
+                .unwrap_or_else(|_| serde_json::json!([])),
+            ratings: serde_json::to_value(&resource.ratings)
+                .unwrap_or_else(|_| serde_json::json!({})),
+            runtime: resource.runtime,
+            in_cinemas: resource.in_cinemas,
+            physical_release: resource.physical_release,
+            digital_release: resource.digital_release,
+            certification: resource.certification.clone(),
+            website: resource.website.clone(),
+            youtube_trailer_id: resource.you_tube_trailer_id.clone(),
+            studio: resource.studio.clone(),
+            popularity: resource.popularity.unwrap_or(0.0),
+            collection_tmdb_id: resource.collection.as_ref().map_or(0, |c| c.tmdb_id),
+            collection_title: resource.collection.as_ref().map(|c| c.name.clone()),
+        })
+    };
+
+    // Call service.add_movie_with_metadata
+    let created = service
+        .add_movie_with_metadata(movie, resource.tmdb_id, metadata)
+        .await?;
 
     // Map to resource
     let created_resource = MovieResource::from_movie(created, 0);

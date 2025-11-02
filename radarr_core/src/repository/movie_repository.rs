@@ -30,6 +30,12 @@ impl SqlxMovieRepository {
         Self { pool }
     }
 
+    /// Gets the connection pool
+    #[must_use]
+    pub const fn pool(&self) -> &Pool<Sqlite> {
+        &self.pool
+    }
+
     /// Loads metadata for a slice of movies
     ///
     /// # Arguments
@@ -949,5 +955,167 @@ impl MovieRepository for PostgresMovieRepository {
         self.load_metadata(&mut movies).await?;
 
         Ok(movies)
+    }
+}
+
+// MovieMetadataRepository implementations
+
+use crate::repository::traits::MovieMetadataRepository;
+
+#[async_trait]
+impl MovieMetadataRepository for SqlxMovieRepository {
+    async fn find_by_tmdb_id(&self, tmdb_id: i32) -> Result<Option<MovieMetadata>> {
+        let metadata_result =
+            sqlx::query_as::<_, MovieMetadata>("SELECT * FROM MovieMetadata WHERE TmdbId = ?")
+                .bind(tmdb_id)
+                .fetch_optional(&self.pool)
+                .await?;
+
+        Ok(metadata_result)
+    }
+
+    async fn insert(&self, metadata: &MovieMetadata) -> Result<MovieMetadata> {
+        let result = sqlx::query(
+            r"
+            INSERT INTO MovieMetadata (
+                TmdbId, ImdbId, Title, OriginalTitle, CleanTitle, SortTitle,
+                Year, Status, Overview, Images, Genres, Ratings, Runtime,
+                InCinemas, PhysicalRelease, DigitalRelease, Certification,
+                Website, YouTubeTrailerId, Studio, Popularity,
+                CollectionTmdbId, CollectionTitle
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ",
+        )
+        .bind(metadata.tmdb_id)
+        .bind(&metadata.imdb_id)
+        .bind(&metadata.title)
+        .bind(&metadata.original_title)
+        .bind(&metadata.clean_title)
+        .bind(&metadata.sort_title)
+        .bind(metadata.year)
+        .bind(metadata.status)
+        .bind(&metadata.overview)
+        .bind(&metadata.images)
+        .bind(&metadata.genres)
+        .bind(&metadata.ratings)
+        .bind(metadata.runtime)
+        .bind(metadata.in_cinemas)
+        .bind(metadata.physical_release)
+        .bind(metadata.digital_release)
+        .bind(&metadata.certification)
+        .bind(&metadata.website)
+        .bind(&metadata.youtube_trailer_id)
+        .bind(&metadata.studio)
+        .bind(metadata.popularity)
+        .bind(metadata.collection_tmdb_id)
+        .bind(&metadata.collection_title)
+        .execute(&self.pool)
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::Database(db_err) => {
+                db_err.code().map_or_else(
+                    || Error::Database(db_err.to_string()),
+                    |code| {
+                        if code == "2067" || code == "1555" {
+                            // SQLite UNIQUE constraint violation
+                            Error::Validation("Movie metadata already exists".to_string())
+                        } else {
+                            Error::Database(db_err.to_string())
+                        }
+                    },
+                )
+            }
+            _ => Error::Database(e.to_string()),
+        })?;
+
+        let id = i32::try_from(result.last_insert_rowid())
+            .map_err(|e| Error::Internal(format!("ID overflow: {e}")))?;
+
+        // Fetch and return the inserted metadata
+        sqlx::query_as::<_, MovieMetadata>("SELECT * FROM MovieMetadata WHERE Id = ?")
+            .bind(id)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|e| Error::Database(e.to_string()))
+    }
+}
+
+#[async_trait]
+impl MovieMetadataRepository for PostgresMovieRepository {
+    async fn find_by_tmdb_id(&self, tmdb_id: i32) -> Result<Option<MovieMetadata>> {
+        let metadata_result =
+            sqlx::query_as::<_, MovieMetadata>("SELECT * FROM MovieMetadata WHERE TmdbId = $1")
+                .bind(tmdb_id)
+                .fetch_optional(&self.pool)
+                .await?;
+
+        Ok(metadata_result)
+    }
+
+    async fn insert(&self, metadata: &MovieMetadata) -> Result<MovieMetadata> {
+        let result = sqlx::query(
+            r"
+            INSERT INTO MovieMetadata (
+                TmdbId, ImdbId, Title, OriginalTitle, CleanTitle, SortTitle,
+                Year, Status, Overview, Images, Genres, Ratings, Runtime,
+                InCinemas, PhysicalRelease, DigitalRelease, Certification,
+                Website, YouTubeTrailerId, Studio, Popularity,
+                CollectionTmdbId, CollectionTitle
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+            RETURNING Id
+            ",
+        )
+        .bind(metadata.tmdb_id)
+        .bind(&metadata.imdb_id)
+        .bind(&metadata.title)
+        .bind(&metadata.original_title)
+        .bind(&metadata.clean_title)
+        .bind(&metadata.sort_title)
+        .bind(metadata.year)
+        .bind(metadata.status)
+        .bind(&metadata.overview)
+        .bind(&metadata.images)
+        .bind(&metadata.genres)
+        .bind(&metadata.ratings)
+        .bind(metadata.runtime)
+        .bind(metadata.in_cinemas)
+        .bind(metadata.physical_release)
+        .bind(metadata.digital_release)
+        .bind(&metadata.certification)
+        .bind(&metadata.website)
+        .bind(&metadata.youtube_trailer_id)
+        .bind(&metadata.studio)
+        .bind(metadata.popularity)
+        .bind(metadata.collection_tmdb_id)
+        .bind(&metadata.collection_title)
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::Database(db_err) => {
+                db_err.code().map_or_else(
+                    || Error::Database(db_err.to_string()),
+                    |code| {
+                        if code == "23505" {
+                            // PostgreSQL UNIQUE constraint violation
+                            Error::Validation("Movie metadata already exists".to_string())
+                        } else {
+                            Error::Database(db_err.to_string())
+                        }
+                    },
+                )
+            }
+            _ => Error::Database(e.to_string()),
+        })?;
+
+        let id: i32 = result.try_get("Id")?;
+
+        // Fetch and return the inserted metadata
+        sqlx::query_as::<_, MovieMetadata>("SELECT * FROM MovieMetadata WHERE Id = $1")
+            .bind(id)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|e| Error::Database(e.to_string()))
     }
 }

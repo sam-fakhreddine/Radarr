@@ -235,3 +235,44 @@ pub trait MovieRepository: Send + Sync {
         include_unmonitored: bool,
     ) -> Result<Vec<Movie>>;
 }
+
+/// Repository trait for movie metadata data access operations
+#[async_trait]
+pub trait MovieMetadataRepository: Send + Sync {
+    /// Finds movie metadata by TMDB ID
+    ///
+    /// # Arguments
+    ///
+    /// * `tmdb_id` - The TMDB ID
+    ///
+    /// # Returns
+    ///
+    /// Returns `Some(MovieMetadata)` if found, `None` otherwise
+    ///
+    /// # Errors
+    ///
+    /// Returns `Error::Database` for database errors
+    async fn find_by_tmdb_id(
+        &self,
+        tmdb_id: i32,
+    ) -> Result<Option<crate::domain::movie_metadata::MovieMetadata>>;
+
+    /// Inserts new movie metadata
+    ///
+    /// # Arguments
+    ///
+    /// * `metadata` - The metadata to insert
+    ///
+    /// # Returns
+    ///
+    /// Returns the inserted metadata with generated ID
+    ///
+    /// # Errors
+    ///
+    /// Returns `Error::Database` for database errors
+    /// Returns `Error::Validation` for constraint violations
+    async fn insert(
+        &self,
+        metadata: &crate::domain::movie_metadata::MovieMetadata,
+    ) -> Result<crate::domain::movie_metadata::MovieMetadata>;
+}
