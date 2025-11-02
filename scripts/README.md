@@ -119,7 +119,7 @@ cargo run --release
 After seeding, you can create movies using the seeded metadata:
 
 ```bash
-curl -X POST http://localhost:7879/api/v3/movie \
+curl -X POST http://localhost:7878/api/v3/movie \
   -H "Content-Type: application/json" \
   -d '{
     "tmdbId": 550,
@@ -136,7 +136,7 @@ The service will automatically look up the metadata for TMDB ID 550 (Fight Club)
 You can also create a movie with metadata that doesn't exist yet:
 
 ```bash
-curl -X POST http://localhost:7879/api/v3/movie \
+curl -X POST http://localhost:7878/api/v3/movie \
   -H "Content-Type: application/json" \
   -d '{
     "title": "The Matrix",
