@@ -156,7 +156,7 @@
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [-] 6. Implement API resource layer
+- [x] 6. Implement API resource layer
   - [x] 6.1 Create MovieResource struct
     - Define all fields matching C# MovieResource
     - Add serde with camelCase renaming
@@ -178,28 +178,28 @@
     - Define UpdateMovieParams with move_files
     - Define DeleteMovieParams with delete_files, add_import_exclusion
     - _Requirements: 1.2, 3.3, 4.2, 4.3_
-  - [-] 6.5 Merge task to rust branch
+  - [x] 6.5 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [ ] 7. Implement HTTP handlers
-  - [ ] 7.1 Implement get_all_movies handler
+- [-] 7. Implement HTTP handlers
+  - [x] 7.1 Implement get_all_movies handler
     - Extract query parameters
     - Handle tmdb_id filter if present
     - Call service.get_all_movies if no filter
     - Map movies to resources
     - Return JSON response
     - _Requirements: 1.2, 1.3_
-  - [ ] 7.2 Implement get_movie_by_id handler
+  - [x] 7.2 Implement get_movie_by_id handler
     - Extract id from path
     - Call service.get_movie
     - Map movie to resource
     - Return JSON response
     - Handle 404 error
     - _Requirements: 1.1, 1.6_
-  - [ ] 7.3 Implement create_movie handler
+  - [x] 7.3 Implement create_movie handler
     - Extract MovieResource from request body
     - Validate required fields
     - Convert resource to movie
@@ -207,7 +207,7 @@
     - Return 201 Created with resource
     - Handle validation errors with 400
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8_
-  - [ ] 7.4 Implement update_movie handler
+  - [x] 7.4 Implement update_movie handler
     - Extract id from path and resource from body
     - Extract query parameters
     - Convert resource to movie
@@ -215,14 +215,14 @@
     - Return 202 Accepted with resource
     - Handle 404 and validation errors
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
-  - [ ] 7.5 Implement delete_movie handler
+  - [x] 7.5 Implement delete_movie handler
     - Extract id from path
     - Extract query parameters
     - Call service.delete_movie
     - Return 200 OK
     - Handle 404 error
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
-  - [ ] 7.6 Merge task to rust branch
+  - [-] 7.6 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch

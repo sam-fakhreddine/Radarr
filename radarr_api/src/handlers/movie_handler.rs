@@ -1,3 +1,227 @@
 //! Movie HTTP handlers
 
-// Placeholder for movie handlers
+use crate::error::AppError;
+use crate::resources::movie_resource::{
+    DeleteMovieParams, MovieQueryParams, MovieResource, UpdateMovieParams,
+};
+use axum::{
+    extract::{Path, Query, State},
+    http::StatusCode,
+    Json,
+};
+use radarr_core::service::movie_service::MovieService;
+use std::sync::Arc;
+
+/// Handles GET /api/v3/movie
+///
+/// Returns all movies or filters by TMDB ID if provided
+///
+/// # Arguments
+///
+/// * `service` - The movie service
+/// * `params` - Query parameters (optional `tmdb_id` filter)
+///
+/// # Returns
+///
+/// Returns JSON array of movie resources
+///
+/// # Errors
+///
+/// Returns 500 for database errors
+#[allow(dead_code)] // Will be used in task 9
+pub async fn get_all_movies(
+    State(service): State<Arc<MovieService>>,
+    Query(params): Query<MovieQueryParams>,
+) -> Result<Json<Vec<MovieResource>>, AppError> {
+    // Handle tmdb_id filter if present
+    if let Some(tmdb_id) = params.tmdb_id {
+        if let Some(movie) = service.find_by_tmdb_id(tmdb_id).await? {
+            let resource = MovieResource::from_movie(movie, 0);
+            return Ok(Json(vec![resource]));
+        }
+        return Ok(Json(vec![]));
+    }
+
+    // Call service.get_all_movies if no filter
+    let movies = service.get_all_movies().await?;
+
+    // Map movies to resources
+    let resources = movies
+        .into_iter()
+        .map(|m| MovieResource::from_movie(m, 0))
+        .collect();
+
+    // Return JSON response
+    Ok(Json(resources))
+}
+
+/// Handles GET /api/v3/movie/:id
+///
+/// Returns a single movie by ID
+///
+/// # Arguments
+///
+/// * `service` - The movie service
+/// * `id` - The movie ID from path
+///
+/// # Returns
+///
+/// Returns JSON movie resource
+///
+/// # Errors
+///
+/// Returns 404 if movie not found
+/// Returns 500 for database errors
+#[allow(dead_code)] // Will be used in task 9
+pub async fn get_movie_by_id(
+    State(service): State<Arc<MovieService>>,
+    Path(id): Path<i32>,
+) -> Result<Json<MovieResource>, AppError> {
+    // Call service.get_movie
+    let movie = service.get_movie(id).await?;
+
+    // Map movie to resource
+    let resource = MovieResource::from_movie(movie, 0);
+
+    // Return JSON response
+    Ok(Json(resource))
+}
+
+/// Handles POST /api/v3/movie
+///
+/// Creates a new movie
+///
+/// # Arguments
+///
+/// * `service` - The movie service
+/// * `resource` - The movie resource from request body
+///
+/// # Returns
+///
+/// Returns 201 Created with the created movie resource
+///
+/// # Errors
+///
+/// Returns 400 for validation errors (duplicate, missing fields, invalid references)
+/// Returns 500 for database errors
+#[allow(dead_code)] // Will be used in task 9
+pub async fn create_movie(
+    State(service): State<Arc<MovieService>>,
+    Json(resource): Json<MovieResource>,
+) -> Result<(StatusCode, Json<MovieResource>), AppError> {
+    // Validate required fields
+    if resource.path.is_empty() && resource.root_folder_path.is_none() {
+        return Err(AppError(radarr_core::error::Error::Validation(
+            "Path or rootFolderPath is required".to_string(),
+        )));
+    }
+
+    if resource.quality_profile_id <= 0 {
+        return Err(AppError(radarr_core::error::Error::Validation(
+            "Valid qualityProfileId is required".to_string(),
+        )));
+    }
+
+    // Convert resource to movie
+    let movie = resource.to_movie();
+
+    // Call service.add_movie
+    let created = service.add_movie(movie).await?;
+
+    // Map to resource
+    let created_resource = MovieResource::from_movie(created, 0);
+
+    // Return 201 Created with resource
+    Ok((StatusCode::CREATED, Json(created_resource)))
+}
+
+/// Handles PUT /api/v3/movie/:id
+///
+/// Updates an existing movie
+///
+/// # Arguments
+///
+/// * `service` - The movie service
+/// * `id` - The movie ID from path
+/// * `params` - Query parameters (`move_files` option)
+/// * `resource` - The movie resource from request body
+///
+/// # Returns
+///
+/// Returns 202 Accepted with the updated movie resource
+///
+/// # Errors
+///
+/// Returns 404 if movie not found
+/// Returns 400 for validation errors
+/// Returns 500 for database errors
+#[allow(dead_code)] // Will be used in task 9
+pub async fn update_movie(
+    State(service): State<Arc<MovieService>>,
+    Path(id): Path<i32>,
+    Query(params): Query<UpdateMovieParams>,
+    Json(resource): Json<MovieResource>,
+) -> Result<(StatusCode, Json<MovieResource>), AppError> {
+    // Validate required fields
+    if resource.path.is_empty() {
+        return Err(AppError(radarr_core::error::Error::Validation(
+            "Path is required".to_string(),
+        )));
+    }
+
+    if resource.quality_profile_id <= 0 {
+        return Err(AppError(radarr_core::error::Error::Validation(
+            "Valid qualityProfileId is required".to_string(),
+        )));
+    }
+
+    // Convert resource to movie
+    let movie = resource.to_movie();
+
+    // Call service.update_movie
+    let updated = service.update_movie(id, movie).await?;
+
+    // TODO: Handle move_files parameter (stub for now)
+    if params.move_files {
+        // File moving logic would go here
+    }
+
+    // Map to resource
+    let updated_resource = MovieResource::from_movie(updated, 0);
+
+    // Return 202 Accepted with resource
+    Ok((StatusCode::ACCEPTED, Json(updated_resource)))
+}
+
+/// Handles DELETE /api/v3/movie/:id
+///
+/// Deletes a movie
+///
+/// # Arguments
+///
+/// * `service` - The movie service
+/// * `id` - The movie ID from path
+/// * `params` - Query parameters (`delete_files`, `add_import_exclusion` options)
+///
+/// # Returns
+///
+/// Returns 200 OK on successful deletion
+///
+/// # Errors
+///
+/// Returns 404 if movie not found
+/// Returns 500 for database errors
+#[allow(dead_code)] // Will be used in task 9
+pub async fn delete_movie(
+    State(service): State<Arc<MovieService>>,
+    Path(id): Path<i32>,
+    Query(params): Query<DeleteMovieParams>,
+) -> Result<StatusCode, AppError> {
+    // Call service.delete_movie
+    service
+        .delete_movie(id, params.delete_files, params.add_import_exclusion)
+        .await?;
+
+    // Return 200 OK
+    Ok(StatusCode::OK)
+}
