@@ -184,7 +184,7 @@
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [-] 7. Implement HTTP handlers
+- [x] 7. Implement HTTP handlers
   - [x] 7.1 Implement get_all_movies handler
     - Extract query parameters
     - Handle tmdb_id filter if present
@@ -222,14 +222,14 @@
     - Return 200 OK
     - Handle 404 error
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
-  - [-] 7.6 Merge task to rust branch
+  - [x] 7.6 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [ ] 8. Implement error handling
-  - [ ] 8.1 Create Error enum
+- [-] 8. Implement error handling
+  - [x] 8.1 Create Error enum
     - Define NotFound variant
     - Define Validation variant
     - Define Database variant with sqlx::Error
@@ -237,12 +237,12 @@
     - Define Internal variant
     - Implement thiserror::Error derivation
     - _Requirements: 10.1, 10.2, 10.3_
-  - [ ] 8.2 Create ApiError struct
+  - [x] 8.2 Create ApiError struct
     - Define message field
     - Define optional errors field for validation
     - Implement JSON serialization
     - _Requirements: 10.1_
-  - [ ] 8.3 Implement IntoResponse for Error
+  - [x] 8.3 Implement IntoResponse for Error
     - Map NotFound to 404 status
     - Map Validation to 400 status
     - Map Database to 500 status with generic message
@@ -250,12 +250,12 @@
     - Map Internal to 500 status
     - Return JSON error response
     - _Requirements: 10.1, 10.2, 10.3, 10.6_
-  - [ ] 8.4 Add validation helpers
+  - [x] 8.4 Add validation helpers
     - Validate path format
     - Validate quality profile exists
     - Return descriptive error messages
     - _Requirements: 10.4, 10.5_
-  - [ ] 8.5 Merge task to rust branch
+  - [-] 8.5 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch

@@ -3,6 +3,7 @@
 use crate::domain::movie::Movie;
 use crate::error::{Error, Result};
 use crate::repository::traits::MovieRepository;
+use crate::validation;
 use chrono::Utc;
 use std::sync::Arc;
 
@@ -86,6 +87,9 @@ impl MovieService {
     ///
     /// Returns `Error::Database` for database errors
     pub async fn add_movie(&self, mut movie: Movie) -> Result<Movie> {
+        // Validate movie fields
+        validation::validate_movie(&movie)?;
+
         // Validate movie doesn't already exist by TMDB ID
         if let Some(existing) = self
             .repository
@@ -122,6 +126,9 @@ impl MovieService {
     /// Returns `Error::Validation` for validation errors
     /// Returns `Error::Database` for database errors
     pub async fn update_movie(&self, id: i32, updates: Movie) -> Result<Movie> {
+        // Validate movie fields
+        validation::validate_movie(&updates)?;
+
         // Get existing movie by ID
         let mut existing = self.repository.get(id).await?;
 
@@ -640,5 +647,71 @@ mod tests {
         assert!(result.is_ok());
         let found = result.expect("Should complete search");
         assert!(found.is_none());
+    }
+
+    #[tokio::test]
+    async fn test_add_movie_invalid_path() {
+        let repo = Arc::new(MockMovieRepository::new());
+        let config = Arc::new(Config::default());
+        let service = MovieService::new(repo, config);
+
+        let mut movie = create_test_movie();
+        movie.path = String::new();
+        movie.root_folder_path = None;
+
+        let result = service.add_movie(movie).await;
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), Error::Validation(_)));
+    }
+
+    #[tokio::test]
+    async fn test_add_movie_invalid_quality_profile() {
+        let repo = Arc::new(MockMovieRepository::new());
+        let config = Arc::new(Config::default());
+        let service = MovieService::new(repo, config);
+
+        let mut movie = create_test_movie();
+        movie.quality_profile_id = 0;
+
+        let result = service.add_movie(movie).await;
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), Error::Validation(_)));
+    }
+
+    #[tokio::test]
+    async fn test_update_movie_invalid_path() {
+        let movie = create_test_movie();
+        let mut movie_with_id = movie.clone();
+        movie_with_id.id = 1;
+
+        let repo = Arc::new(MockMovieRepository::with_movies(vec![movie_with_id]));
+        let config = Arc::new(Config::default());
+        let service = MovieService::new(repo, config);
+
+        let mut updates = create_test_movie();
+        updates.path = String::new();
+        updates.root_folder_path = None;
+
+        let result = service.update_movie(1, updates).await;
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), Error::Validation(_)));
+    }
+
+    #[tokio::test]
+    async fn test_update_movie_invalid_quality_profile() {
+        let movie = create_test_movie();
+        let mut movie_with_id = movie.clone();
+        movie_with_id.id = 1;
+
+        let repo = Arc::new(MockMovieRepository::with_movies(vec![movie_with_id]));
+        let config = Arc::new(Config::default());
+        let service = MovieService::new(repo, config);
+
+        let mut updates = create_test_movie();
+        updates.quality_profile_id = -1;
+
+        let result = service.update_movie(1, updates).await;
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), Error::Validation(_)));
     }
 }
