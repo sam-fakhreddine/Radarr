@@ -9,6 +9,7 @@ inclusion: always
 **Each module, struct, or function should have one reason to change.**
 
 ### Good Example
+
 ```rust
 // Good: Separate concerns
 pub struct MovieRepository {
@@ -41,6 +42,7 @@ pub async fn create_movie_handler(
 ```
 
 ### Bad Example
+
 ```rust
 // Bad: Repository doing business logic AND data access
 impl MovieRepository {
@@ -58,6 +60,7 @@ impl MovieRepository {
 ```
 
 ### Application
+
 - Repository: Only database operations
 - Service: Only business logic
 - Handler: Only HTTP request/response
@@ -69,6 +72,7 @@ impl MovieRepository {
 **Software entities should be open for extension but closed for modification.**
 
 ### Good Example
+
 ```rust
 // Good: Use traits for extension
 #[async_trait]
@@ -101,6 +105,7 @@ impl MovieRepository for PostgresMovieRepository {
 ```
 
 ### Bad Example
+
 ```rust
 // Bad: Hardcoded database type
 pub struct MovieRepository {
@@ -122,6 +127,7 @@ impl MovieRepository {
 ```
 
 ### Application
+
 - Define traits for all abstraction boundaries
 - Use trait objects or generics for flexibility
 - Add new implementations without changing existing code
@@ -132,6 +138,7 @@ impl MovieRepository {
 **Subtypes must be substitutable for their base types.**
 
 ### Good Example
+
 ```rust
 // Good: All implementations honor the contract
 #[async_trait]
@@ -169,6 +176,7 @@ impl MovieRepository for PostgresMovieRepository {
 ```
 
 ### Bad Example
+
 ```rust
 // Bad: Inconsistent behavior
 impl MovieRepository for CachedMovieRepository {
@@ -181,6 +189,7 @@ impl MovieRepository for CachedMovieRepository {
 ```
 
 ### Application
+
 - All trait implementations must honor the same contract
 - Document preconditions and postconditions
 - Maintain consistent error handling
@@ -191,6 +200,7 @@ impl MovieRepository for CachedMovieRepository {
 **Clients should not depend on interfaces they don't use.**
 
 ### Good Example
+
 ```rust
 // Good: Separate focused traits
 #[async_trait]
@@ -225,6 +235,7 @@ pub struct FullMovieService {
 ```
 
 ### Bad Example
+
 ```rust
 // Bad: Fat interface forces unnecessary dependencies
 #[async_trait]
@@ -248,6 +259,7 @@ pub struct ReadOnlyService {
 ```
 
 ### Application
+
 - Create small, focused traits
 - Compose traits when needed
 - Don't force clients to implement unused methods
@@ -258,6 +270,7 @@ pub struct ReadOnlyService {
 **Depend on abstractions, not concretions.**
 
 ### Good Example
+
 ```rust
 // Good: Service depends on trait, not concrete type
 pub struct MovieService {
@@ -283,6 +296,7 @@ fn main() {
 ```
 
 ### Bad Example
+
 ```rust
 // Bad: Service depends on concrete implementation
 pub struct MovieService {
@@ -301,6 +315,7 @@ impl MovieService {
 ```
 
 ### Application
+
 - Define traits for all dependencies
 - Inject dependencies via constructor
 - Use `Arc<dyn Trait>` for shared ownership
@@ -310,6 +325,7 @@ impl MovieService {
 ## SOLID in Practice
 
 ### Layered Architecture
+
 ```rust
 // Domain Layer (abstractions)
 pub trait MovieRepository: Send + Sync { ... }
@@ -338,6 +354,7 @@ fn build_app() -> Router {
 ```
 
 ### Testing with SOLID
+
 ```rust
 // Easy to test with mock implementations
 #[cfg(test)]

@@ -9,6 +9,7 @@ inclusion: always
 ## Core Principle
 
 When implementing a feature:
+
 1. ✅ Complete ALL acceptance criteria
 2. ✅ Write ALL tests (unit + integration)
 3. ✅ Add ALL documentation
@@ -22,6 +23,7 @@ When implementing a feature:
 A feature is DONE when:
 
 ### 1. Implementation Complete
+
 - [ ] All acceptance criteria from requirements are met
 - [ ] All functions/methods are implemented
 - [ ] No `todo!()`, `unimplemented!()`, or placeholder code
@@ -29,6 +31,7 @@ A feature is DONE when:
 - [ ] All edge cases are covered
 
 ### 2. Tests Written
+
 - [ ] Unit tests for all business logic
 - [ ] Integration tests for API endpoints
 - [ ] Error case tests
@@ -37,6 +40,7 @@ A feature is DONE when:
 - [ ] Test coverage > 80%
 
 ### 3. Documentation Added
+
 - [ ] Public APIs have doc comments
 - [ ] Complex logic is explained
 - [ ] Examples provided where helpful
@@ -44,6 +48,7 @@ A feature is DONE when:
 - [ ] Architecture docs updated if needed
 
 ### 4. Code Quality
+
 - [ ] `cargo fmt` passes
 - [ ] `cargo clippy -- -D warnings` passes
 - [ ] No compiler warnings
@@ -53,6 +58,7 @@ A feature is DONE when:
 - [ ] Follows Rust best practices
 
 ### 5. Verification
+
 - [ ] Manual testing completed
 - [ ] Integration with existing features verified
 - [ ] Performance acceptable
@@ -61,6 +67,7 @@ A feature is DONE when:
 ## Implementation Workflow
 
 ### Step 1: Read Requirements
+
 ```
 Before writing ANY code:
 1. Read the requirement completely
@@ -71,6 +78,7 @@ Before writing ANY code:
 ```
 
 ### Step 2: Implement Core Logic
+
 ```rust
 // ✅ Good: Complete implementation
 pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
@@ -109,6 +117,7 @@ pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
 ```
 
 ### Step 3: Write Tests
+
 ```rust
 #[cfg(test)]
 mod tests {
@@ -168,6 +177,7 @@ mod tests {
 ```
 
 ### Step 4: Add Documentation
+
 ```rust
 /// Adds a new movie to the library.
 ///
@@ -209,6 +219,7 @@ pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
 ```
 
 ### Step 5: Verify Complete
+
 ```bash
 # Run all checks
 cargo fmt
@@ -226,6 +237,7 @@ cargo doc --no-deps --open
 ## Anti-Patterns to Avoid
 
 ### ❌ Partial Implementation
+
 ```rust
 // DON'T DO THIS
 pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
@@ -235,6 +247,7 @@ pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
 ```
 
 ### ❌ Skipping Tests
+
 ```rust
 // DON'T DO THIS
 // "I'll write tests later"
@@ -244,6 +257,7 @@ pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
 ```
 
 ### ❌ Incomplete Error Handling
+
 ```rust
 // DON'T DO THIS
 pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
@@ -254,6 +268,7 @@ pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
 ```
 
 ### ❌ Missing Documentation
+
 ```rust
 // DON'T DO THIS
 pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
@@ -263,6 +278,7 @@ pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
 ```
 
 ### ❌ Leaving TODOs
+
 ```rust
 // DON'T DO THIS
 pub async fn add_movie(&self, movie: Movie) -> Result<Movie> {
@@ -324,18 +340,21 @@ For each feature, create a checklist:
 ## Progress Tracking
 
 ### Daily Standup Questions
+
 1. What feature did I complete yesterday?
 2. Is it FULLY complete (implementation + tests + docs)?
 3. What feature am I working on today?
 4. What's blocking me from completing it?
 
 ### Weekly Review
+
 1. How many features were completed this week?
 2. Are there any partially implemented features?
 3. What's the test coverage?
 4. Are there any TODOs in the codebase?
 
 ### Monthly Audit
+
 ```bash
 # Find incomplete features
 rg "TODO|FIXME|XXX|HACK" --type rust
@@ -366,6 +385,7 @@ Move to the next feature ONLY when:
 If you MUST leave something incomplete:
 
 1. **Document it clearly**
+
    ```rust
    // INCOMPLETE: Missing validation for edge case X
    // Tracked in issue #123
@@ -379,6 +399,7 @@ If you MUST leave something incomplete:
    - Who's responsible
 
 3. **Mark it in code**
+
    ```rust
    #[allow(clippy::todo)]
    todo!("Implement validation - Issue #123")
@@ -402,6 +423,7 @@ If you MUST leave something incomplete:
 ## Enforcement
 
 ### Code Review Checklist
+
 - [ ] Feature is complete per requirements
 - [ ] All tests are present and passing
 - [ ] Documentation is complete
@@ -410,6 +432,7 @@ If you MUST leave something incomplete:
 - [ ] Edge cases covered
 
 ### CI/CD Checks
+
 ```yaml
 # Fail build if TODOs exist
 - name: Check for TODOs

@@ -1,11 +1,24 @@
 //! API routing configuration
 
+use crate::handlers::config_handler::get_initialize_config;
 use crate::handlers::movie_handler::{
     create_movie, delete_movie, get_all_movies, get_movie_by_id, update_movie,
 };
-use axum::{routing::get, Router};
+use crate::handlers::stub_handler::{
+    get_collections, get_custom_filters, get_import_lists, get_indexer_flags, get_languages,
+    get_localization, get_localization_language, get_quality_profiles, get_system_status, get_tags,
+    get_ui_config,
+};
+use axum::{
+    body::Body,
+    http::{header, StatusCode},
+    response::Response,
+    routing::get,
+    Router,
+};
 use radarr_core::service::movie_service::MovieService;
 use std::sync::Arc;
+use tower_http::services::ServeDir;
 
 /// Application configuration
 #[derive(Clone, Debug)]
@@ -87,4 +100,76 @@ pub fn movie_routes() -> Router<AppState> {
             "/api/v3/movie/:id",
             get(get_movie_by_id).put(update_movie).delete(delete_movie),
         )
+}
+
+/// Serves index.html with URL_BASE replaced
+async fn serve_index_html() -> Result<Response, StatusCode> {
+    let url_base = std::env::var("URL_BASE").unwrap_or_default();
+    let index_path = "legacy/_output/UI/index.html";
+
+    let content = tokio::fs::read_to_string(index_path)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let content = content.replace("__URL_BASE__", &url_base);
+
+    Ok(Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, "text/html; charset=utf-8")
+        .body(Body::from(content))
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?)
+}
+
+/// Creates stub API routes for unimplemented endpoints
+///
+/// These routes return minimal valid responses to allow the frontend to load
+fn stub_routes() -> Router<AppState> {
+    Router::new()
+        .route("/api/v3/system/status", get(get_system_status))
+        .route("/api/v3/config/ui", get(get_ui_config))
+        .route("/api/v3/qualityprofile", get(get_quality_profiles))
+        .route("/api/v3/language", get(get_languages))
+        .route("/api/v3/localization", get(get_localization))
+        .route("/api/v3/localization/language", get(get_localization_language))
+        .route("/api/v3/tag", get(get_tags))
+        .route("/api/v3/collection", get(get_collections))
+        .route("/api/v3/customFilter", get(get_custom_filters))
+        .route("/api/v3/indexerFlag", get(get_indexer_flags))
+        .route("/api/v3/importlist", get(get_import_lists))
+}
+
+/// Creates the complete application router with API and static file serving
+///
+/// This router includes:
+/// - API routes under /api/v3/*
+/// - Initialize configuration endpoint
+/// - Static file serving from legacy/_output/UI
+/// - SPA fallback to index.html for client-side routing
+///
+/// # Arguments
+///
+/// * `state` - The application state
+///
+/// # Returns
+///
+/// Returns a Router configured with all routes
+pub fn app_router(state: AppState) -> Router {
+    // Serve static files from the legacy frontend build output
+    let serve_dir = ServeDir::new("legacy/_output/UI")
+        .precompressed_gzip()
+        .precompressed_br();
+
+    Router::new()
+        // Initialize configuration endpoint
+        .route("/initialize.json", get(get_initialize_config))
+        // API routes
+        .merge(movie_routes())
+        .merge(stub_routes())
+        // Custom index.html handler for root and explicit index.html
+        .route("/", get(serve_index_html))
+        .route("/index.html", get(serve_index_html))
+        // Static files for everything else
+        .fallback_service(serve_dir)
+        // State for API routes
+        .with_state(state)
 }

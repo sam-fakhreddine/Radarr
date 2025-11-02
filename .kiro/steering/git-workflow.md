@@ -25,6 +25,7 @@ feature/task-3.1-create-movies-table-migration
 ```
 
 ### Rules
+
 - Use `feature/` prefix for new features
 - Use `fix/` prefix for bug fixes
 - Include task number from tasks.md
@@ -132,6 +133,7 @@ git checkout -b feature/task-2.1-create-movie-status-enum
 ## Commit Message Guidelines
 
 ### Format
+
 ```
 <type>: <subject>
 
@@ -141,6 +143,7 @@ git checkout -b feature/task-2.1-create-movie-status-enum
 ```
 
 ### Types
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `docs:` - Documentation changes
@@ -165,6 +168,7 @@ git commit -m "updates"
 ```
 
 ### Task Completion Commit
+
 ```bash
 git commit -m "Complete Task 2.1: Create MovieStatusType enum
 
@@ -180,12 +184,14 @@ Requirements: 1.4, 8.5"
 ## Branch Protection Rules
 
 ### Rust Branch
+
 - Require all tests to pass
 - Require clippy to pass with zero warnings
 - Require code formatting check
 - No direct commits (only merges from feature branches)
 
 ### Feature Branches
+
 - Must be up-to-date with rust before merging
 - Must pass all CI checks
 - Must have task completion commit message
@@ -193,6 +199,7 @@ Requirements: 1.4, 8.5"
 ## Handling Conflicts
 
 ### If Conflicts Occur During Rebase
+
 ```bash
 # View conflicts
 git status
@@ -209,6 +216,7 @@ git rebase --abort
 ```
 
 ### Prevention
+
 - Keep feature branches short-lived
 - Merge to develop frequently
 - Pull from develop regularly
@@ -217,6 +225,7 @@ git rebase --abort
 ## Emergency Fixes
 
 ### Hotfix Workflow
+
 ```bash
 # Create hotfix branch from rust
 git checkout rust
@@ -273,6 +282,7 @@ Before merging each task:
 ## CI/CD Integration
 
 ### GitHub Actions Example
+
 ```yaml
 name: Feature Branch CI
 
@@ -312,6 +322,7 @@ jobs:
 ## Common Mistakes to Avoid
 
 ### ❌ Don't
+
 - Don't work directly on rust branch
 - Don't merge incomplete tasks
 - Don't skip quality checks before merging
@@ -321,6 +332,7 @@ jobs:
 - Don't merge without updating from rust first
 
 ### ✅ Do
+
 - Create a new branch for each task
 - Merge completed tasks promptly
 - Run all checks before merging
@@ -361,6 +373,7 @@ rust (main development branch)
 ## Task Tracking
 
 ### Update tasks.md After Merge
+
 ```bash
 # After merging task, update tasks.md
 # Change [ ] to [x] for completed task

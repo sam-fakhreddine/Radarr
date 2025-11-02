@@ -775,24 +775,28 @@ async fn test_create_movie() {
 ## Migration Path
 
 ### Phase 1: Core Implementation
+
 - Implement domain models
 - Implement repository layer with SQLite support
 - Implement service layer
 - Basic API endpoints
 
 ### Phase 2: Feature Parity
+
 - Add PostgreSQL support
 - Implement all lookup methods
 - Add validation
 - Error handling improvements
 
 ### Phase 3: Optimization
+
 - Add caching
 - Performance tuning
 - Load testing
 - Memory profiling
 
 ### Phase 4: Integration
+
 - Frontend compatibility testing
 - Database migration tools
 - Deployment documentation

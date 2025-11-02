@@ -9,6 +9,7 @@ inclusion: always
 ## Required Tools
 
 ### 1. rustfmt (Code Formatting)
+
 ```bash
 # Install
 rustup component add rustfmt
@@ -23,6 +24,7 @@ cargo fmt -- --check
 ```
 
 ### 2. Clippy (Linting)
+
 ```bash
 # Install
 rustup component add clippy
@@ -38,6 +40,7 @@ cargo clippy --fix
 ```
 
 ### 3. cargo check (Fast Compilation Check)
+
 ```bash
 # Quick syntax and type check
 cargo check
@@ -47,6 +50,7 @@ cargo check --all-targets
 ```
 
 ### 4. cargo test (Run Tests)
+
 ```bash
 # Run all tests
 cargo test
@@ -59,6 +63,7 @@ cargo test test_name
 ```
 
 ### 5. cargo audit (Security Audit)
+
 ```bash
 # Install
 cargo install cargo-audit
@@ -73,6 +78,7 @@ cargo audit fix
 ## Clippy Configuration
 
 ### Cargo.toml Lints
+
 ```toml
 [lints.rust]
 unsafe_code = "forbid"
@@ -97,6 +103,7 @@ missing_panics_doc = "warn"
 ```
 
 ### clippy.toml (Project Root)
+
 ```toml
 # Cognitive complexity threshold
 cognitive-complexity-threshold = 15
@@ -111,6 +118,7 @@ missing-docs-in-crate-items = true
 ## rustfmt Configuration
 
 ### rustfmt.toml (Project Root)
+
 ```toml
 # Edition
 edition = "2021"
@@ -138,6 +146,7 @@ chain_width = 60
 ## Pre-commit Workflow
 
 ### Manual Checks
+
 ```bash
 # 1. Format code
 cargo fmt
@@ -156,7 +165,9 @@ cargo build --release
 ```
 
 ### Git Pre-commit Hook
+
 Create `.git/hooks/pre-commit`:
+
 ```bash
 #!/bin/bash
 
@@ -191,6 +202,7 @@ exit 0
 ```
 
 Make it executable:
+
 ```bash
 chmod +x .git/hooks/pre-commit
 ```
@@ -198,6 +210,7 @@ chmod +x .git/hooks/pre-commit
 ## Common Clippy Warnings and Fixes
 
 ### 1. Unnecessary Clones
+
 ```rust
 // ❌ Bad
 fn process(s: String) -> String {
@@ -211,6 +224,7 @@ fn process(s: String) -> String {
 ```
 
 ### 2. Needless Borrow
+
 ```rust
 // ❌ Bad
 let x = &vec![1, 2, 3];
@@ -222,6 +236,7 @@ for item in &x { }
 ```
 
 ### 3. Redundant Field Names
+
 ```rust
 // ❌ Bad
 Movie {
@@ -237,6 +252,7 @@ Movie {
 ```
 
 ### 4. Explicit Returns
+
 ```rust
 // ❌ Bad
 fn add(a: i32, b: i32) -> i32 {
@@ -250,6 +266,7 @@ fn add(a: i32, b: i32) -> i32 {
 ```
 
 ### 5. Match on Bool
+
 ```rust
 // ❌ Bad
 match is_valid {
@@ -266,6 +283,7 @@ if is_valid {
 ```
 
 ### 6. Single Match
+
 ```rust
 // ❌ Bad
 match result {
@@ -280,6 +298,7 @@ if let Some(x) = result {
 ```
 
 ### 7. Unnecessary Unwrap
+
 ```rust
 // ❌ Bad
 let value = option.unwrap();
@@ -291,6 +310,7 @@ let value = option.ok_or(Error::Missing)?;
 ```
 
 ### 8. Large Enum Variants
+
 ```rust
 // ❌ Bad
 enum Response {
@@ -306,6 +326,7 @@ enum Response {
 ```
 
 ### 9. Inefficient String Building
+
 ```rust
 // ❌ Bad
 let mut s = String::new();
@@ -319,6 +340,7 @@ s.push_str(" world");
 ```
 
 ### 10. Needless Collect
+
 ```rust
 // ❌ Bad
 let sum: i32 = vec.iter()
@@ -336,6 +358,7 @@ let sum: i32 = vec.iter()
 ## Editor Integration
 
 ### VS Code
+
 ```json
 {
     "rust-analyzer.checkOnSave.command": "clippy",
@@ -348,6 +371,7 @@ let sum: i32 = vec.iter()
 ```
 
 ### IntelliJ IDEA / RustRover
+
 - Settings → Languages & Frameworks → Rust → Rustfmt
   - ✅ Run rustfmt on Save
 - Settings → Languages & Frameworks → Rust → External Linters
@@ -355,6 +379,7 @@ let sum: i32 = vec.iter()
   - Select: Clippy
 
 ### Vim/Neovim
+
 ```vim
 " Using rust.vim
 let g:rustfmt_autosave = 1
@@ -364,6 +389,7 @@ let g:rust_clip_command = 'cargo clippy'
 ## CI/CD Integration
 
 ### GitHub Actions
+
 ```yaml
 name: Rust CI
 
@@ -399,6 +425,7 @@ jobs:
 ## Fixing Clippy Issues
 
 ### Automatic Fixes
+
 ```bash
 # Fix all auto-fixable issues
 cargo clippy --fix
@@ -411,6 +438,7 @@ cargo clippy --fix --allow-staged
 ```
 
 ### Manual Fixes
+
 1. Read the clippy message carefully
 2. Understand why it's a problem
 3. Apply the suggested fix
@@ -418,6 +446,7 @@ cargo clippy --fix --allow-staged
 5. Run tests to ensure nothing broke
 
 ### Suppressing Warnings (Use Sparingly)
+
 ```rust
 // Suppress for a single item
 #[allow(clippy::too_many_arguments)]
@@ -434,6 +463,7 @@ fn complex_function(a: i32, b: i32, c: i32, d: i32, e: i32, f: i32) { }
 ```
 
 **Only suppress when:**
+
 - You have a good reason
 - You've documented why
 - There's no better alternative
@@ -441,6 +471,7 @@ fn complex_function(a: i32, b: i32, c: i32, d: i32, e: i32, f: i32) { }
 ## Continuous Monitoring
 
 ### Daily Checks
+
 ```bash
 # Quick check before starting work
 cargo check
@@ -450,6 +481,7 @@ cargo fmt && cargo clippy -- -D warnings && cargo test
 ```
 
 ### Weekly Checks
+
 ```bash
 # Update dependencies
 cargo update
@@ -463,6 +495,7 @@ cargo audit
 ```
 
 ### Monthly Checks
+
 ```bash
 # Update Rust toolchain
 rustup update
@@ -477,12 +510,14 @@ cargo test --all-targets
 **All code MUST have zero warnings.**
 
 ### Why?
+
 - Warnings hide real issues
 - Warnings accumulate over time
 - Warnings become noise
 - Warnings indicate code smells
 
 ### How?
+
 1. Fix warnings immediately
 2. Treat warnings as errors in CI
 3. Review clippy suggestions
@@ -492,6 +527,7 @@ cargo test --all-targets
 ## Checklist
 
 Before every commit:
+
 - [ ] `cargo fmt` - Code is formatted
 - [ ] `cargo clippy -- -D warnings` - No clippy warnings
 - [ ] `cargo test` - All tests pass

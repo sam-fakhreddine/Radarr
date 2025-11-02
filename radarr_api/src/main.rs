@@ -87,17 +87,13 @@ async fn main() -> anyhow::Result<()> {
 
     // Build router with state
     let app_state = routes::AppState::new(movie_service, config.clone());
-    let app = routes::movie_routes()
-        .layer(
-            tower_http::trace::TraceLayer::new_for_http()
-                .make_span_with(tower_http::trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
-                .on_request(tower_http::trace::DefaultOnRequest::new().level(tracing::Level::INFO))
-                .on_response(
-                    tower_http::trace::DefaultOnResponse::new().level(tracing::Level::INFO),
-                ),
-        )
-        .with_state(app_state);
-    tracing::debug!("Router configured");
+    let app = routes::app_router(app_state).layer(
+        tower_http::trace::TraceLayer::new_for_http()
+            .make_span_with(tower_http::trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
+            .on_request(tower_http::trace::DefaultOnRequest::new().level(tracing::Level::INFO))
+            .on_response(tower_http::trace::DefaultOnResponse::new().level(tracing::Level::INFO)),
+    );
+    tracing::debug!("Router configured with API and static file serving");
 
     // Start HTTP server
     let addr = format!("{}:{}", config.host, config.port);

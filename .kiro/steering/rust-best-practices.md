@@ -7,6 +7,7 @@ inclusion: always
 ## Code Quality Standards
 
 ### Error Handling
+
 - **ALWAYS** use `Result<T, E>` for fallible operations
 - **NEVER** use `.unwrap()` or `.expect()` in production code
 - Use `thiserror` for domain errors with descriptive messages
@@ -15,6 +16,7 @@ inclusion: always
 - Log errors at appropriate levels before returning
 
 ### Type Safety
+
 - Leverage Rust's type system for compile-time guarantees
 - Use newtypes for domain concepts (e.g., `MovieId(i32)` instead of raw `i32`)
 - Prefer `Option<T>` over nullable patterns
@@ -22,6 +24,7 @@ inclusion: always
 - Implement `From`/`TryFrom` for type conversions
 
 ### Ownership and Borrowing
+
 - Prefer borrowing (`&T`) over cloning when possible
 - Use `Arc<T>` for shared ownership across threads
 - Use `Cow<T>` for clone-on-write scenarios
@@ -29,6 +32,7 @@ inclusion: always
 - Document lifetime requirements clearly
 
 ### Async/Await
+
 - Use `async fn` for I/O-bound operations
 - Use `tokio::spawn` for concurrent tasks
 - Use `tokio::spawn_blocking` for CPU-intensive work
@@ -37,6 +41,7 @@ inclusion: always
 - Avoid blocking operations in async contexts
 
 ### Memory Management
+
 - Minimize allocations in hot paths
 - Use `Vec::with_capacity` when size is known
 - Prefer stack allocation over heap when possible
@@ -44,6 +49,7 @@ inclusion: always
 - Profile memory usage with tools like `heaptrack`
 
 ### Traits and Generics
+
 - Define traits for abstraction boundaries
 - Use trait objects (`dyn Trait`) for runtime polymorphism
 - Use generics for compile-time polymorphism
@@ -51,6 +57,7 @@ inclusion: always
 - Use `#[async_trait]` for async trait methods
 
 ### Testing
+
 - Write unit tests for all business logic
 - Write integration tests for API endpoints
 - Use `#[cfg(test)]` for test-only code
@@ -59,6 +66,7 @@ inclusion: always
 - Use property-based testing for complex logic
 
 ### Documentation
+
 - Document all public APIs with `///` doc comments
 - Include examples in doc comments
 - Document panics, errors, and safety requirements
@@ -66,6 +74,7 @@ inclusion: always
 - Document architectural decisions
 
 ### Performance
+
 - Profile before optimizing
 - Use `#[inline]` judiciously
 - Avoid premature optimization
@@ -76,6 +85,7 @@ inclusion: always
 ## Code Organization
 
 ### Module Structure
+
 ```rust
 // Good: Clear module hierarchy
 mod domain {
@@ -95,12 +105,14 @@ mod movie_service;
 ```
 
 ### Visibility
+
 - Make fields private by default
 - Expose only necessary APIs as `pub`
 - Use `pub(crate)` for internal APIs
 - Use `pub(super)` for parent module access
 
 ### Naming Conventions
+
 - Use `snake_case` for functions, variables, modules
 - Use `PascalCase` for types, traits, enums
 - Use `SCREAMING_SNAKE_CASE` for constants
@@ -110,6 +122,7 @@ mod movie_service;
 ## Dependency Management
 
 ### Cargo.toml
+
 - Pin major versions for stability
 - Use workspace dependencies for consistency
 - Minimize dependency count
@@ -117,6 +130,7 @@ mod movie_service;
 - Document why each dependency is needed
 
 ### Feature Flags
+
 - Use features for optional functionality
 - Keep default features minimal
 - Document feature combinations
@@ -124,6 +138,7 @@ mod movie_service;
 ## Security
 
 ### Input Validation
+
 - Validate all external input
 - Sanitize data before database operations
 - Use parameterized queries (sqlx handles this)
@@ -131,6 +146,7 @@ mod movie_service;
 - Rate limit API endpoints
 
 ### Secrets Management
+
 - Never hardcode secrets
 - Use environment variables or secret managers
 - Don't log sensitive data
@@ -139,6 +155,7 @@ mod movie_service;
 ## Rust-Specific Patterns
 
 ### Builder Pattern
+
 ```rust
 // Use for complex object construction
 let movie = Movie::builder()
@@ -149,6 +166,7 @@ let movie = Movie::builder()
 ```
 
 ### Newtype Pattern
+
 ```rust
 // Use for type safety
 pub struct MovieId(i32);
@@ -156,6 +174,7 @@ pub struct TmdbId(i32);
 ```
 
 ### Type State Pattern
+
 ```rust
 // Use for compile-time state validation
 struct Movie<State> {
@@ -174,6 +193,7 @@ impl Movie<Draft> {
 ## Linting and Formatting
 
 ### Required Tools
+
 - `rustfmt` - Code formatting (run on save)
 - `clippy` - Linting (fix all warnings)
 - `cargo check` - Fast compilation check
@@ -181,6 +201,7 @@ impl Movie<Draft> {
 - `cargo audit` - Security audits
 
 ### Clippy Configuration
+
 ```toml
 # Cargo.toml
 [lints.clippy]
@@ -193,6 +214,7 @@ panic = "deny"
 ```
 
 ### Pre-commit Checks
+
 ```bash
 cargo fmt --check
 cargo clippy -- -D warnings
@@ -203,6 +225,7 @@ cargo audit
 ## Common Pitfalls to Avoid
 
 ### Don't
+
 - ❌ Use `.unwrap()` in production
 - ❌ Ignore compiler warnings
 - ❌ Use `unsafe` without documentation
@@ -213,6 +236,7 @@ cargo audit
 - ❌ Use global mutable state
 
 ### Do
+
 - ✅ Handle all errors explicitly
 - ✅ Fix all clippy warnings
 - ✅ Write tests for new code

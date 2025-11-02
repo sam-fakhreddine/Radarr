@@ -19,6 +19,39 @@ A Rust port of Radarr's movie CRUD operations, maintaining full API compatibilit
 
 - Rust 1.75 or later
 - SQLite or PostgreSQL
+- Node.js 20.x and Yarn 1.22.x (for frontend)
+
+## Quick Start
+
+### Backend Only
+
+1. Build and run the Rust backend:
+   ```bash
+   cargo run --release
+   ```
+
+2. The API will be available at http://localhost:7878/api/v3/
+
+### Full Stack (Backend + Frontend)
+
+1. Build the frontend:
+   ```bash
+   cd legacy
+   yarn install
+   yarn build
+   cd ..
+   ```
+
+2. Run the backend (serves both API and frontend):
+   ```bash
+   cargo run --release
+   ```
+
+3. Access the application:
+   - **Web UI**: http://localhost:7878/
+   - **API**: http://localhost:7878/api/v3/movie
+
+See [FRONTEND_INTEGRATION.md](FRONTEND_INTEGRATION.md) for detailed frontend setup and development workflow.
 
 ## Setup
 
@@ -34,14 +67,9 @@ A Rust port of Radarr's movie CRUD operations, maintaining full API compatibilit
    cargo build
    ```
 
-4. Run migrations (once implemented):
+4. Run migrations (automatically run on startup):
    ```bash
-   cargo sqlx migrate run
-   ```
-
-5. Run the API server:
-   ```bash
-   cargo run --bin radarr_api
+   cargo run --release
    ```
 
 ## Development

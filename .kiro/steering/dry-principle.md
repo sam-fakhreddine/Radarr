@@ -9,12 +9,14 @@ inclusion: always
 ## Core Concepts
 
 ### What is DRY?
+
 - Avoid duplicating logic, data structures, or algorithms
 - Extract common patterns into reusable abstractions
 - Single source of truth for each concept
 - Changes should only need to happen in one place
 
 ### What DRY is NOT
+
 - Not about avoiding any code similarity
 - Not about premature abstraction
 - Not about making everything generic
@@ -23,6 +25,7 @@ inclusion: always
 ## Code Duplication
 
 ### Bad: Duplicated Logic
+
 ```rust
 // Bad: Same validation logic repeated
 pub async fn create_movie(movie: Movie) -> Result<Movie> {
@@ -47,6 +50,7 @@ pub async fn update_movie(movie: Movie) -> Result<Movie> {
 ```
 
 ### Good: Extract Common Logic
+
 ```rust
 // Good: Single validation function
 fn validate_movie(movie: &Movie) -> Result<()> {
@@ -73,6 +77,7 @@ pub async fn update_movie(movie: Movie) -> Result<Movie> {
 ## Data Structure Duplication
 
 ### Bad: Repeated Structures
+
 ```rust
 // Bad: Same fields in multiple structs
 pub struct CreateMovieRequest {
@@ -104,6 +109,7 @@ pub struct MovieResponse {
 ```
 
 ### Good: Shared Base Structure
+
 ```rust
 // Good: Single source of truth
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -138,6 +144,7 @@ pub struct MovieResponse {
 ## Query Duplication
 
 ### Bad: Repeated SQL
+
 ```rust
 // Bad: Same query pattern repeated
 impl MovieRepository {
@@ -166,6 +173,7 @@ impl MovieRepository {
 ```
 
 ### Good: Query Builder
+
 ```rust
 // Good: Reusable query builder
 impl MovieRepository {
@@ -195,6 +203,7 @@ impl MovieRepository {
 ## Error Handling Duplication
 
 ### Bad: Repeated Error Mapping
+
 ```rust
 // Bad: Same error mapping everywhere
 pub async fn get_movie(&self, id: i32) -> Result<Movie> {
@@ -215,6 +224,7 @@ pub async fn get_quality_profile(&self, id: i32) -> Result<QualityProfile> {
 ```
 
 ### Good: Generic Error Mapper
+
 ```rust
 // Good: Reusable error mapper
 trait MapNotFound<T> {
@@ -246,6 +256,7 @@ pub async fn get_quality_profile(&self, id: i32) -> Result<QualityProfile> {
 ## Conversion Duplication
 
 ### Bad: Repeated Conversions
+
 ```rust
 // Bad: Same conversion logic in multiple places
 impl MovieResource {
@@ -272,6 +283,7 @@ impl MovieListItem {
 ```
 
 ### Good: Shared Conversion Trait
+
 ```rust
 // Good: Implement From trait once
 impl From<Movie> for MovieData {
@@ -306,6 +318,7 @@ impl MovieListItem {
 ## Configuration Duplication
 
 ### Bad: Hardcoded Values
+
 ```rust
 // Bad: Magic numbers everywhere
 pub async fn get_movies(&self) -> Result<Vec<Movie>> {
@@ -326,6 +339,7 @@ pub async fn get_quality_profiles(&self) -> Result<Vec<QualityProfile>> {
 ```
 
 ### Good: Centralized Configuration
+
 ```rust
 // Good: Single source of configuration
 pub struct Config {
@@ -361,6 +375,7 @@ impl MovieService {
 ### Acceptable Repetition
 
 #### 1. Different Domains
+
 ```rust
 // OK: Similar but semantically different
 pub struct Movie {
@@ -375,6 +390,7 @@ pub struct QualityProfile {
 ```
 
 #### 2. Coincidental Similarity
+
 ```rust
 // OK: Happens to look similar now, but will diverge
 pub fn validate_movie_path(path: &str) -> Result<()> {
@@ -394,6 +410,7 @@ pub fn validate_config_path(path: &str) -> Result<()> {
 ```
 
 #### 3. Test Data
+
 ```rust
 // OK: Test data can be duplicated for clarity
 #[test]
@@ -420,6 +437,7 @@ fn test_update_movie() {
 ## DRY Checklist
 
 Before writing code:
+
 - [ ] Is this logic already implemented elsewhere?
 - [ ] Can this be extracted into a reusable function?
 - [ ] Is this data structure duplicated?
@@ -427,6 +445,7 @@ Before writing code:
 - [ ] Is this configuration value hardcoded multiple times?
 
 Before extracting:
+
 - [ ] Will these implementations diverge in the future?
 - [ ] Are they in the same domain?
 - [ ] Will the abstraction make the code clearer?
@@ -435,6 +454,7 @@ Before extracting:
 ## Tools and Techniques
 
 ### Macros for Repetitive Code
+
 ```rust
 // Use macros for boilerplate
 macro_rules! impl_repository_get {
@@ -453,6 +473,7 @@ macro_rules! impl_repository_get {
 ```
 
 ### Trait Implementations
+
 ```rust
 // Use traits for common behavior
 pub trait Entity {
@@ -467,6 +488,7 @@ impl Entity for Movie {
 ```
 
 ### Generic Functions
+
 ```rust
 // Use generics for type-agnostic logic
 pub async fn get_by_id<T>(

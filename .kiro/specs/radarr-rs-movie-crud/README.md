@@ -5,6 +5,7 @@
 This specification defines the Rust port of Radarr's movie CRUD operations, maintaining full API compatibility with the existing Radarr V3 API while providing equivalent functionality for managing movie entities.
 
 **Project Structure**: The Rust implementation is being built alongside the existing C# codebase:
+
 - **Rust code**: Root directory (`radarr_core/`, `radarr_api/`, `Cargo.toml`)
 - **Legacy C# code**: `legacy/` directory (for reference during conversion)
 
@@ -54,6 +55,7 @@ git checkout -b feature/task-1-setup-project-structure
 ### 4. Follow the Workflow
 
 For each task:
+
 1. Create feature branch from develop
 2. Implement ALL acceptance criteria
 3. Write ALL tests
@@ -84,6 +86,7 @@ cargo audit
 ### Definition of Done
 
 A task is complete when:
+
 - ✅ All acceptance criteria met
 - ✅ All tests written and passing
 - ✅ All documentation complete
@@ -143,6 +146,7 @@ radarr_api/
 ## Development Principles
 
 ### SOLID
+
 - Single Responsibility: Each module has one purpose
 - Open/Closed: Extend via traits, not modification
 - Liskov Substitution: All implementations honor contracts
@@ -150,11 +154,13 @@ radarr_api/
 - Dependency Inversion: Depend on abstractions
 
 ### DRY
+
 - Extract common logic into reusable functions
 - Single source of truth for data structures
 - Avoid duplicating queries and error handling
 
 ### No Feature Left Behind
+
 - Complete ALL acceptance criteria
 - Write ALL tests
 - Add ALL documentation
@@ -162,12 +168,14 @@ radarr_api/
 - No TODOs in production code
 
 ### Always Lint and Fix
+
 - Zero warnings policy
 - Format on save
 - Fix clippy issues immediately
 - Run checks before every commit
 
 ### Git Workflow
+
 - One branch per task
 - Always branch from develop
 - Merge before next task
@@ -185,6 +193,7 @@ radarr_api/
 ## Questions?
 
 Refer to the steering documents for detailed guidance on:
+
 - Rust best practices
 - SOLID principles
 - DRY principle
