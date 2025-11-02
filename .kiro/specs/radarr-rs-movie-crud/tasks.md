@@ -7,7 +7,7 @@
   - Set up database migration directory structure
   - _Requirements: 5.1, 5.2, 5.3_
 
-- [-] 2. Implement domain models and types
+- [x] 2. Implement domain models and types
   - [x] 2.1 Create MovieStatusType enum with serialization
     - Define TBA, Announced, InCinemas, Released variants
     - Implement serde serialization with camelCase
@@ -36,6 +36,11 @@
     - Apply availability delay parameter
     - Handle missing release dates with 90-day default
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
+  - [x] 2.6 Merge task to rust branch
+    - Run all quality checks (fmt, clippy, tests)
+    - Merge feature branch to rust using --squash
+    - Delete feature branch
+    - _Requirements: All task requirements_
 
 - [ ] 3. Create database schema and migrations
   - [ ] 3.1 Create Movies table migration
@@ -173,6 +178,11 @@
     - Define UpdateMovieParams with move_files
     - Define DeleteMovieParams with delete_files, add_import_exclusion
     - _Requirements: 1.2, 3.3, 4.2, 4.3_
+  - [ ] 6.5 Merge task to rust branch
+    - Run all quality checks (fmt, clippy, tests)
+    - Merge feature branch to rust using --squash
+    - Delete feature branch
+    - _Requirements: All task requirements_
 
 - [ ] 7. Implement HTTP handlers
   - [ ] 7.1 Implement get_all_movies handler
@@ -212,6 +222,11 @@
     - Return 200 OK
     - Handle 404 error
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
+  - [ ] 7.6 Merge task to rust branch
+    - Run all quality checks (fmt, clippy, tests)
+    - Merge feature branch to rust using --squash
+    - Delete feature branch
+    - _Requirements: All task requirements_
 
 - [ ] 8. Implement error handling
   - [ ] 8.1 Create Error enum
@@ -240,6 +255,11 @@
     - Validate quality profile exists
     - Return descriptive error messages
     - _Requirements: 10.4, 10.5_
+  - [ ] 8.5 Merge task to rust branch
+    - Run all quality checks (fmt, clippy, tests)
+    - Merge feature branch to rust using --squash
+    - Delete feature branch
+    - _Requirements: All task requirements_
 
 - [ ] 9. Configure routing and application
   - [ ] 9.1 Create movie_routes function
@@ -262,6 +282,11 @@
     - Build router with state
     - Start HTTP server
     - _Requirements: 5.3, 9.4, 9.5_
+  - [ ] 9.4 Merge task to rust branch
+    - Run all quality checks (fmt, clippy, tests)
+    - Merge feature branch to rust using --squash
+    - Delete feature branch
+    - _Requirements: All task requirements_
 
 - [ ] 10. Write integration tests
   - [ ] 10.1 Create test database setup helper
@@ -323,3 +348,8 @@
     - Test availability delay
     - Test missing dates fallback
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
+  - [ ] 10.11 Merge task to rust branch
+    - Run all quality checks (fmt, clippy, tests)
+    - Merge feature branch to rust using --squash
+    - Delete feature branch
+    - _Requirements: All task requirements_
