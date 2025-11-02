@@ -114,7 +114,7 @@
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [-] 5. Implement service layer
+- [x] 5. Implement service layer
   - [x] 5.1 Create MovieService struct
     - Add repository and config dependencies
     - Implement constructor
@@ -150,35 +150,35 @@
     - Implement find_by_imdb_id calling repository
     - Implement find_by_path calling repository
     - _Requirements: 6.1, 6.2, 6.3_
-  - [-] 5.8 Merge task to rust branch
+  - [x] 5.8 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [ ] 6. Implement API resource layer
-  - [ ] 6.1 Create MovieResource struct
+- [-] 6. Implement API resource layer
+  - [x] 6.1 Create MovieResource struct
     - Define all fields matching C# MovieResource
     - Add serde with camelCase renaming
     - Add skip_serializing_if for optional fields
     - _Requirements: 8.1, 8.2, 8.3_
-  - [ ] 6.2 Implement from_movie conversion
+  - [x] 6.2 Implement from_movie conversion
     - Map all Movie fields to MovieResource
     - Map MovieMetadata fields to resource
     - Calculate is_available using availability delay
     - Calculate has_file from movie_file_id
     - Parse images JSON to MediaCover array
     - _Requirements: 1.4, 1.5, 8.2_
-  - [ ] 6.3 Implement to_movie conversion
+  - [x] 6.3 Implement to_movie conversion
     - Map MovieResource fields to Movie
     - Handle missing metadata fields
     - _Requirements: 2.1, 3.1_
-  - [ ] 6.4 Create query parameter structs
+  - [x] 6.4 Create query parameter structs
     - Define MovieQueryParams with tmdb_id, exclude_local_covers, language_id
     - Define UpdateMovieParams with move_files
     - Define DeleteMovieParams with delete_files, add_import_exclusion
     - _Requirements: 1.2, 3.3, 4.2, 4.3_
-  - [ ] 6.5 Merge task to rust branch
+  - [-] 6.5 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch
