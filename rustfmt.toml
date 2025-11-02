@@ -1,0 +1,21 @@
+# Rust formatting configuration
+edition = "2021"
+
+# Line width
+max_width = 100
+comment_width = 80
+
+# Imports
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
+
+# Formatting
+use_small_heuristics = "Default"
+fn_single_line = false
+where_single_line = false
+
+# Trailing comma
+trailing_comma = "Vertical"
+
+# Chains
+chain_width = 60

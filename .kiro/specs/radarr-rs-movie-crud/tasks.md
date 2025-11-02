@@ -1,0 +1,310 @@
+# Implementation Plan
+
+- [x] 1. Set up Rust project structure and dependencies
+  - Create workspace with `radarr_core` and `radarr_api` crates
+  - Add dependencies: axum, sqlx, serde, tokio, thiserror, validator
+  - Configure sqlx for compile-time query checking
+  - Set up database migration directory structure
+  - _Requirements: 5.1, 5.2, 5.3_
+
+- [ ] 2. Implement domain models and types
+  - [ ] 2.1 Create MovieStatusType enum with serialization
+    - Define TBA, Announced, InCinemas, Released variants
+    - Implement serde serialization with camelCase
+    - Implement sqlx Type trait for database mapping
+    - _Requirements: 1.4, 8.5_
+  - [ ] 2.2 Create Ratings and Rating structs
+    - Define Rating struct with value and votes fields
+    - Define Ratings struct with imdb, tmdb, metacritic, rotten_tomatoes fields
+    - Implement JSON serialization/deserialization
+    - _Requirements: 1.4, 8.2_
+  - [ ] 2.3 Implement MovieMetadata entity
+    - Define all fields matching database schema
+    - Implement sqlx::FromRow derivation
+    - Add serde serialization with camelCase
+    - _Requirements: 1.4, 5.2, 8.2_
+  - [ ] 2.4 Implement Movie entity
+    - Define all fields matching database schema
+    - Implement has_file() method
+    - Implement apply_changes() method
+    - Add lazy-loaded movie_metadata field
+    - _Requirements: 1.4, 3.2, 5.1_
+  - [ ] 2.5 Implement is_available() method on Movie
+    - Handle TBA/Announced minimum availability
+    - Handle InCinemas minimum availability
+    - Handle Released minimum availability with earliest date
+    - Apply availability delay parameter
+    - Handle missing release dates with 90-day default
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
+
+- [ ] 3. Create database schema and migrations
+  - [ ] 3.1 Create Movies table migration
+    - Define all columns matching C# schema
+    - Add foreign key to MovieMetadata
+    - Create indexes on MovieMetadataId and Path
+    - _Requirements: 5.1_
+  - [ ] 3.2 Create MovieMetadata table migration
+    - Define all columns matching C# schema
+    - Add unique constraint on TmdbId
+    - Create indexes on TmdbId, ImdbId, CleanTitle
+    - _Requirements: 5.2_
+  - [ ] 3.3 Add PostgreSQL-specific migrations
+    - Create PostgreSQL variants of table definitions
+    - Handle type differences (INTEGER vs SERIAL)
+    - _Requirements: 5.3_
+
+- [ ] 4. Implement repository layer
+  - [ ] 4.1 Define MovieRepository trait
+    - Define get, find, all methods
+    - Define insert, update, delete methods
+    - Define find_by_tmdb_id, find_by_imdb_id, find_by_path methods
+    - Define bulk operation methods
+    - Define query methods (all_movie_paths, all_movie_tmdb_ids)
+    - _Requirements: 1.1, 2.1, 3.1, 4.1, 6.1, 6.2, 6.3_
+  - [ ] 4.2 Implement SqlxMovieRepository for SQLite
+    - Implement get method with metadata loading
+    - Implement find method returning Option
+    - Implement all method with efficient metadata loading
+    - Handle RowNotFound error mapping to NotFound
+    - _Requirements: 1.1, 1.6, 5.3_
+  - [ ] 4.3 Implement insert operation
+    - Build parameterized INSERT query
+    - Handle JSON serialization for Tags field
+    - Return inserted movie with generated ID
+    - Use RETURNING clause for PostgreSQL, last_insert_rowid for SQLite
+    - _Requirements: 2.1, 5.5_
+  - [ ] 4.4 Implement update operation
+    - Build parameterized UPDATE query
+    - Handle JSON serialization for Tags field
+    - Return updated movie
+    - _Requirements: 3.1, 5.5_
+  - [ ] 4.5 Implement delete operation
+    - Execute DELETE query by ID
+    - Return unit result
+    - _Requirements: 4.1_
+  - [ ] 4.6 Implement lookup methods
+    - Implement find_by_tmdb_id with JOIN to MovieMetadata
+    - Implement find_by_imdb_id with JOIN to MovieMetadata
+    - Implement find_by_path with exact match
+    - Implement find_by_titles with CleanTitle matching
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
+  - [ ] 4.7 Implement bulk operations
+    - Implement insert_many with transaction
+    - Implement update_many with transaction
+    - Implement delete_many with IN clause
+    - _Requirements: 9.1, 9.2, 9.3, 9.4_
+  - [ ] 4.8 Add PostgreSQL support
+    - Create PostgreSQL-specific query variants
+    - Handle type differences in queries
+    - Test with PostgreSQL database
+    - _Requirements: 5.3_
+
+- [ ] 5. Implement service layer
+  - [ ] 5.1 Create MovieService struct
+    - Add repository and config dependencies
+    - Implement constructor
+    - _Requirements: 1.1, 2.1, 3.1, 4.1_
+  - [ ] 5.2 Implement get_movie method
+    - Call repository.get
+    - Return movie or propagate error
+    - _Requirements: 1.1, 1.6_
+  - [ ] 5.3 Implement get_all_movies method
+    - Call repository.all
+    - Return all movies
+    - _Requirements: 1.3_
+  - [ ] 5.4 Implement add_movie method
+    - Validate movie doesn't exist by TMDB ID
+    - Set added timestamp to current UTC time
+    - Call repository.insert
+    - Return created movie
+    - _Requirements: 2.1, 2.5, 2.6, 2.7, 2.8_
+  - [ ] 5.5 Implement update_movie method
+    - Get existing movie by ID
+    - Apply changes using apply_changes method
+    - Call repository.update
+    - Return updated movie
+    - _Requirements: 3.1, 3.2, 3.6, 3.7, 3.8_
+  - [ ] 5.6 Implement delete_movie method
+    - Get movie by ID to verify existence
+    - Call repository.delete
+    - Handle delete_files parameter (stub for now)
+    - Handle add_import_exclusion parameter (stub for now)
+    - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
+  - [ ] 5.7 Implement lookup methods
+    - Implement find_by_tmdb_id calling repository
+    - Implement find_by_imdb_id calling repository
+    - Implement find_by_path calling repository
+    - _Requirements: 6.1, 6.2, 6.3_
+
+- [ ] 6. Implement API resource layer
+  - [ ] 6.1 Create MovieResource struct
+    - Define all fields matching C# MovieResource
+    - Add serde with camelCase renaming
+    - Add skip_serializing_if for optional fields
+    - _Requirements: 8.1, 8.2, 8.3_
+  - [ ] 6.2 Implement from_movie conversion
+    - Map all Movie fields to MovieResource
+    - Map MovieMetadata fields to resource
+    - Calculate is_available using availability delay
+    - Calculate has_file from movie_file_id
+    - Parse images JSON to MediaCover array
+    - _Requirements: 1.4, 1.5, 8.2_
+  - [ ] 6.3 Implement to_movie conversion
+    - Map MovieResource fields to Movie
+    - Handle missing metadata fields
+    - _Requirements: 2.1, 3.1_
+  - [ ] 6.4 Create query parameter structs
+    - Define MovieQueryParams with tmdb_id, exclude_local_covers, language_id
+    - Define UpdateMovieParams with move_files
+    - Define DeleteMovieParams with delete_files, add_import_exclusion
+    - _Requirements: 1.2, 3.3, 4.2, 4.3_
+
+- [ ] 7. Implement HTTP handlers
+  - [ ] 7.1 Implement get_all_movies handler
+    - Extract query parameters
+    - Handle tmdb_id filter if present
+    - Call service.get_all_movies if no filter
+    - Map movies to resources
+    - Return JSON response
+    - _Requirements: 1.2, 1.3_
+  - [ ] 7.2 Implement get_movie_by_id handler
+    - Extract id from path
+    - Call service.get_movie
+    - Map movie to resource
+    - Return JSON response
+    - Handle 404 error
+    - _Requirements: 1.1, 1.6_
+  - [ ] 7.3 Implement create_movie handler
+    - Extract MovieResource from request body
+    - Validate required fields
+    - Convert resource to movie
+    - Call service.add_movie
+    - Return 201 Created with resource
+    - Handle validation errors with 400
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8_
+  - [ ] 7.4 Implement update_movie handler
+    - Extract id from path and resource from body
+    - Extract query parameters
+    - Convert resource to movie
+    - Call service.update_movie
+    - Return 202 Accepted with resource
+    - Handle 404 and validation errors
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
+  - [ ] 7.5 Implement delete_movie handler
+    - Extract id from path
+    - Extract query parameters
+    - Call service.delete_movie
+    - Return 200 OK
+    - Handle 404 error
+    - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
+
+- [ ] 8. Implement error handling
+  - [ ] 8.1 Create Error enum
+    - Define NotFound variant
+    - Define Validation variant
+    - Define Database variant with sqlx::Error
+    - Define Serialization variant with serde_json::Error
+    - Define Internal variant
+    - Implement thiserror::Error derivation
+    - _Requirements: 10.1, 10.2, 10.3_
+  - [ ] 8.2 Create ApiError struct
+    - Define message field
+    - Define optional errors field for validation
+    - Implement JSON serialization
+    - _Requirements: 10.1_
+  - [ ] 8.3 Implement IntoResponse for Error
+    - Map NotFound to 404 status
+    - Map Validation to 400 status
+    - Map Database to 500 status with generic message
+    - Map Serialization to 500 status
+    - Map Internal to 500 status
+    - Return JSON error response
+    - _Requirements: 10.1, 10.2, 10.3, 10.6_
+  - [ ] 8.4 Add validation helpers
+    - Validate path format
+    - Validate quality profile exists
+    - Return descriptive error messages
+    - _Requirements: 10.4, 10.5_
+
+- [ ] 9. Configure routing and application
+  - [ ] 9.1 Create movie_routes function
+    - Define GET /api/v3/movie route
+    - Define POST /api/v3/movie route
+    - Define GET /api/v3/movie/:id route
+    - Define PUT /api/v3/movie/:id route
+    - Define DELETE /api/v3/movie/:id route
+    - _Requirements: 1.1, 1.2, 1.3, 2.1, 3.1, 4.1_
+  - [ ] 9.2 Create AppState struct
+    - Add MovieService to state
+    - Add Config to state
+    - Implement Clone for Arc-wrapped services
+    - _Requirements: 1.1, 2.1, 3.1, 4.1_
+  - [ ] 9.3 Create main application setup
+    - Initialize database connection pool
+    - Run migrations
+    - Create repository instance
+    - Create service instance
+    - Build router with state
+    - Start HTTP server
+    - _Requirements: 5.3, 9.4, 9.5_
+
+- [ ] 10. Write integration tests
+  - [ ] 10.1 Create test database setup helper
+    - Create test database connection
+    - Run migrations
+    - Provide cleanup function
+    - _Requirements: 5.1, 5.2, 5.3_
+  - [ ] 10.2 Test movie creation flow
+    - Insert test movie via API
+    - Verify 201 response
+    - Verify movie in database
+    - Verify all fields match
+    - _Requirements: 2.1, 2.5, 2.6_
+  - [ ] 10.3 Test movie retrieval
+    - Insert test movie
+    - Retrieve by ID via API
+    - Verify response matches
+    - Test 404 for non-existent ID
+    - _Requirements: 1.1, 1.6_
+  - [ ] 10.4 Test movie update flow
+    - Insert test movie
+    - Update via API
+    - Verify 202 response
+    - Verify changes in database
+    - _Requirements: 3.1, 3.2, 3.6_
+  - [ ] 10.5 Test movie deletion
+    - Insert test movie
+    - Delete via API
+    - Verify 200 response
+    - Verify movie removed from database
+    - _Requirements: 4.1, 4.4_
+  - [ ] 10.6 Test lookup operations
+    - Insert test movies
+    - Test find by TMDB ID
+    - Test find by IMDB ID
+    - Test find by path
+    - _Requirements: 6.1, 6.2, 6.3_
+  - [ ] 10.7 Test error scenarios
+    - Test duplicate movie creation
+    - Test invalid quality profile ID
+    - Test missing required fields
+    - Verify error response format
+    - _Requirements: 10.1, 10.2, 10.4, 10.5_
+  - [ ] 10.8 Test transaction rollback
+    - Simulate database error during insert
+    - Verify no partial data committed
+    - Test rollback on update failure
+    - _Requirements: 9.1, 9.2, 9.3_
+  - [ ] 10.9 Test JSON serialization compatibility
+    - Compare JSON output with C# implementation
+    - Verify field names match (camelCase)
+    - Verify date format (ISO 8601)
+    - Verify enum serialization
+    - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
+  - [ ] 10.10 Test availability calculation
+    - Test TBA/Announced availability
+    - Test InCinemas availability
+    - Test Released availability with dates
+    - Test availability delay
+    - Test missing dates fallback
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_

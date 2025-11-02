@@ -1,0 +1,10 @@
+# Clippy configuration
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 15
+
+# Avoid false positives
+avoid-breaking-exported-api = true
+
+# Documentation
+missing-docs-in-crate-items = true
