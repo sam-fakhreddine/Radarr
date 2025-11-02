@@ -232,24 +232,28 @@ mod tests {
     }
 
     #[test]
-    fn test_get_tags() {
+    fn test_get_tags() -> Result<(), Box<dyn std::error::Error>> {
         let movie = create_test_movie();
-        let tags = movie.get_tags().unwrap();
+        let tags = movie.get_tags()?;
 
         assert_eq!(tags.len(), 3);
         assert_eq!(tags, vec![1, 2, 3]);
+
+        Ok(())
     }
 
     #[test]
-    fn test_movie_serialization() {
+    fn test_movie_serialization() -> Result<(), Box<dyn std::error::Error>> {
         let movie = create_test_movie();
-        let json = serde_json::to_value(&movie).unwrap();
+        let json = serde_json::to_value(&movie)?;
 
         assert_eq!(json["id"], 1);
         assert_eq!(json["movieMetadataId"], 1);
         assert_eq!(json["monitored"], true);
         assert_eq!(json["qualityProfileId"], 1);
         assert_eq!(json["path"], "/movies/Inception (2010)");
+
+        Ok(())
     }
 
     #[test]

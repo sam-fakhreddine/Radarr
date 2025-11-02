@@ -155,8 +155,8 @@ mod tests {
             images: serde_json::json!([]),
             genres: serde_json::json!(["Action", "Science Fiction", "Thriller"]),
             ratings: serde_json::json!({
-                "imdb": {"value": 8.8, "votes": 2000000},
-                "tmdb": {"value": 8.3, "votes": 25000}
+                "imdb": {"value": 8.8, "votes": 2_000_000},
+                "tmdb": {"value": 8.3, "votes": 25_000}
             }),
             runtime: 148,
             in_cinemas: Some(Utc::now()),
@@ -182,35 +182,43 @@ mod tests {
     }
 
     #[test]
-    fn test_movie_metadata_serialization() {
+    fn test_movie_metadata_serialization() -> Result<(), Box<dyn std::error::Error>> {
         let metadata = create_test_metadata();
-        let json = serde_json::to_value(&metadata).unwrap();
+        let json = serde_json::to_value(&metadata)?;
 
         assert_eq!(json["id"], 1);
         assert_eq!(json["tmdbId"], 27205);
         assert_eq!(json["imdbId"], "tt1375666");
         assert_eq!(json["title"], "Inception");
         assert_eq!(json["year"], 2010);
+
+        Ok(())
     }
 
     #[test]
-    fn test_get_ratings() {
+    fn test_get_ratings() -> Result<(), Box<dyn std::error::Error>> {
         let metadata = create_test_metadata();
-        let ratings = metadata.get_ratings().unwrap();
+        let ratings = metadata.get_ratings()?;
 
         assert!(ratings.imdb.is_some());
-        assert_eq!(ratings.imdb.unwrap().value, 8.8);
+        if let Some(imdb) = ratings.imdb {
+            assert!((imdb.value - 8.8).abs() < f32::EPSILON);
+        }
         assert!(ratings.tmdb.is_some());
+
+        Ok(())
     }
 
     #[test]
-    fn test_get_genres() {
+    fn test_get_genres() -> Result<(), Box<dyn std::error::Error>> {
         let metadata = create_test_metadata();
-        let genres = metadata.get_genres().unwrap();
+        let genres = metadata.get_genres()?;
 
         assert_eq!(genres.len(), 3);
         assert!(genres.contains(&"Action".to_string()));
         assert!(genres.contains(&"Science Fiction".to_string()));
         assert!(genres.contains(&"Thriller".to_string()));
+
+        Ok(())
     }
 }

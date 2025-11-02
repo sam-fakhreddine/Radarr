@@ -18,9 +18,20 @@ pub struct ApiError {
     pub errors: Option<Vec<String>>,
 }
 
-impl IntoResponse for CoreError {
+/// Wrapper type for `CoreError` to implement `IntoResponse`
+/// This is needed to satisfy the orphan rule
+#[derive(Debug)]
+pub struct AppError(pub CoreError);
+
+impl From<CoreError> for AppError {
+    fn from(error: CoreError) -> Self {
+        Self(error)
+    }
+}
+
+impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        let (status, message) = match self {
+        let (status, message) = match self.0 {
             CoreError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
             CoreError::Validation(msg) => (StatusCode::BAD_REQUEST, msg),
             CoreError::Database(_) => (
