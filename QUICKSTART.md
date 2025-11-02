@@ -107,6 +107,13 @@ cargo fmt && cargo clippy --all-targets -- -D warnings && cargo test
 
 The database is automatically initialized on first run. However, you need to manually create a quality profile before adding movies:
 
+```bash
+# Use the provided seed script
+sqlite3 radarr.db < seed.sql
+```
+
+Or manually:
+
 ```sql
 -- Connect to the database
 sqlite3 radarr.db
@@ -115,8 +122,6 @@ sqlite3 radarr.db
 INSERT INTO QualityProfiles (Id, Name, Cutoff, Items, MinFormatScore, CutoffFormatScore, FormatItems, Language, UpgradeAllowed)
 VALUES (1, 'HD-1080p', 7, '[]', 0, 0, '[]', 1, 1);
 ```
-
-Or use the provided seed script (if available).
 
 ## Troubleshooting
 
@@ -132,9 +137,12 @@ PORT=8080 cargo run --package radarr_api
 ### Migration errors
 If migrations fail, you can reset the database:
 ```bash
-rm radarr.db
+rm radarr.db radarr.db-shm radarr.db-wal
 cargo run --package radarr_api
 ```
+
+### UNIQUE constraint failed: _sqlx_migrations.version
+This error occurs if you have duplicate migration files. The PostgreSQL migrations have been disabled (renamed to `.disabled`) to prevent conflicts. Only SQLite migrations will run.
 
 ## Project Structure
 
