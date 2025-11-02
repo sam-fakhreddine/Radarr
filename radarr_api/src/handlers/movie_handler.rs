@@ -4,13 +4,12 @@ use crate::error::AppError;
 use crate::resources::movie_resource::{
     DeleteMovieParams, MovieQueryParams, MovieResource, UpdateMovieParams,
 };
+use crate::routes::AppState;
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
     Json,
 };
-use radarr_core::service::movie_service::MovieService;
-use std::sync::Arc;
 
 /// Handles GET /api/v3/movie
 ///
@@ -28,11 +27,12 @@ use std::sync::Arc;
 /// # Errors
 ///
 /// Returns 500 for database errors
-#[allow(dead_code)] // Will be used in task 9
 pub async fn get_all_movies(
-    State(service): State<Arc<MovieService>>,
+    State(state): State<AppState>,
     Query(params): Query<MovieQueryParams>,
 ) -> Result<Json<Vec<MovieResource>>, AppError> {
+    let service = &state.movie_service;
+
     // Handle tmdb_id filter if present
     if let Some(tmdb_id) = params.tmdb_id {
         if let Some(movie) = service.find_by_tmdb_id(tmdb_id).await? {
@@ -72,11 +72,12 @@ pub async fn get_all_movies(
 ///
 /// Returns 404 if movie not found
 /// Returns 500 for database errors
-#[allow(dead_code)] // Will be used in task 9
 pub async fn get_movie_by_id(
-    State(service): State<Arc<MovieService>>,
+    State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<Json<MovieResource>, AppError> {
+    let service = &state.movie_service;
+
     // Call service.get_movie
     let movie = service.get_movie(id).await?;
 
@@ -104,11 +105,11 @@ pub async fn get_movie_by_id(
 ///
 /// Returns 400 for validation errors (duplicate, missing fields, invalid references)
 /// Returns 500 for database errors
-#[allow(dead_code)] // Will be used in task 9
 pub async fn create_movie(
-    State(service): State<Arc<MovieService>>,
+    State(state): State<AppState>,
     Json(resource): Json<MovieResource>,
 ) -> Result<(StatusCode, Json<MovieResource>), AppError> {
+    let service = &state.movie_service;
     // Validate required fields
     if resource.path.is_empty() && resource.root_folder_path.is_none() {
         return Err(AppError(radarr_core::error::Error::Validation(
@@ -155,13 +156,13 @@ pub async fn create_movie(
 /// Returns 404 if movie not found
 /// Returns 400 for validation errors
 /// Returns 500 for database errors
-#[allow(dead_code)] // Will be used in task 9
 pub async fn update_movie(
-    State(service): State<Arc<MovieService>>,
+    State(state): State<AppState>,
     Path(id): Path<i32>,
     Query(params): Query<UpdateMovieParams>,
     Json(resource): Json<MovieResource>,
 ) -> Result<(StatusCode, Json<MovieResource>), AppError> {
+    let service = &state.movie_service;
     // Validate required fields
     if resource.path.is_empty() {
         return Err(AppError(radarr_core::error::Error::Validation(
@@ -211,12 +212,13 @@ pub async fn update_movie(
 ///
 /// Returns 404 if movie not found
 /// Returns 500 for database errors
-#[allow(dead_code)] // Will be used in task 9
 pub async fn delete_movie(
-    State(service): State<Arc<MovieService>>,
+    State(state): State<AppState>,
     Path(id): Path<i32>,
     Query(params): Query<DeleteMovieParams>,
 ) -> Result<StatusCode, AppError> {
+    let service = &state.movie_service;
+
     // Call service.delete_movie
     service
         .delete_movie(id, params.delete_files, params.add_import_exclusion)

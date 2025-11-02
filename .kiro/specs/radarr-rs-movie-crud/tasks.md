@@ -261,20 +261,20 @@
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [ ] 9. Configure routing and application
-  - [ ] 9.1 Create movie_routes function
+- [-] 9. Configure routing and application
+  - [x] 9.1 Create movie_routes function
     - Define GET /api/v3/movie route
     - Define POST /api/v3/movie route
     - Define GET /api/v3/movie/:id route
     - Define PUT /api/v3/movie/:id route
     - Define DELETE /api/v3/movie/:id route
     - _Requirements: 1.1, 1.2, 1.3, 2.1, 3.1, 4.1_
-  - [ ] 9.2 Create AppState struct
+  - [x] 9.2 Create AppState struct
     - Add MovieService to state
     - Add Config to state
     - Implement Clone for Arc-wrapped services
     - _Requirements: 1.1, 2.1, 3.1, 4.1_
-  - [ ] 9.3 Create main application setup
+  - [x] 9.3 Create main application setup
     - Initialize database connection pool
     - Run migrations
     - Create repository instance
@@ -282,7 +282,7 @@
     - Build router with state
     - Start HTTP server
     - _Requirements: 5.3, 9.4, 9.5_
-  - [ ] 9.4 Merge task to rust branch
+  - [-] 9.4 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch
