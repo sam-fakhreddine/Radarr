@@ -46,9 +46,14 @@ async fn main() -> anyhow::Result<()> {
     // Initialize database connection pool (SQLite for now)
     tracing::info!("Connecting to database: {}", config.database_url);
 
+    // Create database file if it doesn't exist
     let pool = sqlx::sqlite::SqlitePoolOptions::new()
         .max_connections(5)
-        .connect(&config.database_url)
+        .connect_with(
+            sqlx::sqlite::SqliteConnectOptions::new()
+                .filename(&config.database_url.trim_start_matches("sqlite:"))
+                .create_if_missing(true),
+        )
         .await?;
 
     // Run migrations
