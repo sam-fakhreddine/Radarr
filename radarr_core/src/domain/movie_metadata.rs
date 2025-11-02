@@ -10,6 +10,7 @@ use sqlx::FromRow;
 #[serde(rename_all = "camelCase")]
 pub struct MovieMetadata {
     /// Unique identifier
+    #[sqlx(rename = "Id")]
     pub id: i32,
 
     /// The Movie Database (TMDB) ID

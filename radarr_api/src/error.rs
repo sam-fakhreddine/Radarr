@@ -31,18 +31,27 @@ impl From<CoreError> for AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        let (status, message) = match self.0 {
-            CoreError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
-            CoreError::Validation(msg) => (StatusCode::BAD_REQUEST, msg),
-            CoreError::Database(_) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Database error occurred".to_string(),
-            ),
-            CoreError::Serialization(_) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Serialization error occurred".to_string(),
-            ),
-            CoreError::Internal(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
+        let (status, message) = match &self.0 {
+            CoreError::NotFound(msg) => (StatusCode::NOT_FOUND, msg.clone()),
+            CoreError::Validation(msg) => (StatusCode::BAD_REQUEST, msg.clone()),
+            CoreError::Database(err) => {
+                tracing::error!("Database error: {}", err);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Database error occurred".to_string(),
+                )
+            }
+            CoreError::Serialization(err) => {
+                tracing::error!("Serialization error: {}", err);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Serialization error occurred".to_string(),
+                )
+            }
+            CoreError::Internal(msg) => {
+                tracing::error!("Internal error: {}", msg);
+                (StatusCode::INTERNAL_SERVER_ERROR, msg.clone())
+            }
         };
 
         let body = Json(ApiError {
