@@ -63,7 +63,7 @@
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [-] 4. Implement repository layer
+- [x] 4. Implement repository layer
   - [x] 4.1 Define MovieRepository trait
     - Define get, find, all methods
     - Define insert, update, delete methods
@@ -108,49 +108,49 @@
     - Handle type differences in queries
     - Test with PostgreSQL database
     - _Requirements: 5.3_
-  - [-] 4.9 Merge task to rust branch
+  - [x] 4.9 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [ ] 5. Implement service layer
-  - [ ] 5.1 Create MovieService struct
+- [-] 5. Implement service layer
+  - [x] 5.1 Create MovieService struct
     - Add repository and config dependencies
     - Implement constructor
     - _Requirements: 1.1, 2.1, 3.1, 4.1_
-  - [ ] 5.2 Implement get_movie method
+  - [x] 5.2 Implement get_movie method
     - Call repository.get
     - Return movie or propagate error
     - _Requirements: 1.1, 1.6_
-  - [ ] 5.3 Implement get_all_movies method
+  - [x] 5.3 Implement get_all_movies method
     - Call repository.all
     - Return all movies
     - _Requirements: 1.3_
-  - [ ] 5.4 Implement add_movie method
+  - [x] 5.4 Implement add_movie method
     - Validate movie doesn't exist by TMDB ID
     - Set added timestamp to current UTC time
     - Call repository.insert
     - Return created movie
     - _Requirements: 2.1, 2.5, 2.6, 2.7, 2.8_
-  - [ ] 5.5 Implement update_movie method
+  - [x] 5.5 Implement update_movie method
     - Get existing movie by ID
     - Apply changes using apply_changes method
     - Call repository.update
     - Return updated movie
     - _Requirements: 3.1, 3.2, 3.6, 3.7, 3.8_
-  - [ ] 5.6 Implement delete_movie method
+  - [x] 5.6 Implement delete_movie method
     - Get movie by ID to verify existence
     - Call repository.delete
     - Handle delete_files parameter (stub for now)
     - Handle add_import_exclusion parameter (stub for now)
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
-  - [ ] 5.7 Implement lookup methods
+  - [x] 5.7 Implement lookup methods
     - Implement find_by_tmdb_id calling repository
     - Implement find_by_imdb_id calling repository
     - Implement find_by_path calling repository
     - _Requirements: 6.1, 6.2, 6.3_
-  - [ ] 5.8 Merge task to rust branch
+  - [-] 5.8 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch
