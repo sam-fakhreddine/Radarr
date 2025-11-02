@@ -74,45 +74,49 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_movie_status_serialization() {
+    fn test_movie_status_serialization() -> Result<(), Box<dyn std::error::Error>> {
         // Test TBA serialization
         let status = MovieStatusType::Tba;
-        let json = serde_json::to_string(&status).unwrap();
+        let json = serde_json::to_string(&status)?;
         assert_eq!(json, r#""tba""#);
 
         // Test Announced serialization
         let status = MovieStatusType::Announced;
-        let json = serde_json::to_string(&status).unwrap();
+        let json = serde_json::to_string(&status)?;
         assert_eq!(json, r#""announced""#);
 
         // Test InCinemas serialization
         let status = MovieStatusType::InCinemas;
-        let json = serde_json::to_string(&status).unwrap();
+        let json = serde_json::to_string(&status)?;
         assert_eq!(json, r#""inCinemas""#);
 
         // Test Released serialization
         let status = MovieStatusType::Released;
-        let json = serde_json::to_string(&status).unwrap();
+        let json = serde_json::to_string(&status)?;
         assert_eq!(json, r#""released""#);
+
+        Ok(())
     }
 
     #[test]
-    fn test_movie_status_deserialization() {
+    fn test_movie_status_deserialization() -> Result<(), Box<dyn std::error::Error>> {
         // Test TBA deserialization
-        let status: MovieStatusType = serde_json::from_str(r#""tba""#).unwrap();
+        let status: MovieStatusType = serde_json::from_str(r#""tba""#)?;
         assert_eq!(status, MovieStatusType::Tba);
 
         // Test Announced deserialization
-        let status: MovieStatusType = serde_json::from_str(r#""announced""#).unwrap();
+        let status: MovieStatusType = serde_json::from_str(r#""announced""#)?;
         assert_eq!(status, MovieStatusType::Announced);
 
         // Test InCinemas deserialization
-        let status: MovieStatusType = serde_json::from_str(r#""inCinemas""#).unwrap();
+        let status: MovieStatusType = serde_json::from_str(r#""inCinemas""#)?;
         assert_eq!(status, MovieStatusType::InCinemas);
 
         // Test Released deserialization
-        let status: MovieStatusType = serde_json::from_str(r#""released""#).unwrap();
+        let status: MovieStatusType = serde_json::from_str(r#""released""#)?;
         assert_eq!(status, MovieStatusType::Released);
+
+        Ok(())
     }
 
     #[test]
@@ -124,31 +128,35 @@ mod tests {
     #[test]
     fn test_rating_creation() {
         let rating = Rating::new(8.5, 1000);
-        assert_eq!(rating.value, 8.5);
+        assert!((rating.value - 8.5).abs() < f32::EPSILON);
         assert_eq!(rating.votes, 1000);
     }
 
     #[test]
-    fn test_rating_serialization() {
+    fn test_rating_serialization() -> Result<(), Box<dyn std::error::Error>> {
         let rating = Rating {
             value: 8.5,
             votes: 1000,
         };
-        let json = serde_json::to_string(&rating).unwrap();
+        let json = serde_json::to_string(&rating)?;
         let expected = r#"{"value":8.5,"votes":1000}"#;
         assert_eq!(json, expected);
+
+        Ok(())
     }
 
     #[test]
-    fn test_rating_deserialization() {
+    fn test_rating_deserialization() -> Result<(), Box<dyn std::error::Error>> {
         let json = r#"{"value":8.5,"votes":1000}"#;
-        let rating: Rating = serde_json::from_str(json).unwrap();
-        assert_eq!(rating.value, 8.5);
+        let rating: Rating = serde_json::from_str(json)?;
+        assert!((rating.value - 8.5).abs() < f32::EPSILON);
         assert_eq!(rating.votes, 1000);
+
+        Ok(())
     }
 
     #[test]
-    fn test_ratings_serialization() {
+    fn test_ratings_serialization() -> Result<(), Box<dyn std::error::Error>> {
         let ratings = Ratings {
             imdb: Some(Rating::new(8.5, 1000)),
             tmdb: Some(Rating::new(8.0, 500)),
@@ -156,27 +164,33 @@ mod tests {
             rotten_tomatoes: Some(Rating::new(90.0, 200)),
         };
 
-        let json = serde_json::to_value(&ratings).unwrap();
+        let json = serde_json::to_value(&ratings)?;
         assert!(json.get("imdb").is_some());
         assert!(json.get("tmdb").is_some());
         assert!(json.get("metacritic").is_none());
         assert!(json.get("rottenTomatoes").is_some());
+
+        Ok(())
     }
 
     #[test]
-    fn test_ratings_deserialization() {
+    fn test_ratings_deserialization() -> Result<(), Box<dyn std::error::Error>> {
         let json = r#"{
             "imdb": {"value": 8.5, "votes": 1000},
             "tmdb": {"value": 8.0, "votes": 500},
             "rottenTomatoes": {"value": 90.0, "votes": 200}
         }"#;
 
-        let ratings: Ratings = serde_json::from_str(json).unwrap();
+        let ratings: Ratings = serde_json::from_str(json)?;
         assert!(ratings.imdb.is_some());
-        assert_eq!(ratings.imdb.unwrap().value, 8.5);
+        if let Some(imdb) = ratings.imdb {
+            assert!((imdb.value - 8.5).abs() < f32::EPSILON);
+        }
         assert!(ratings.tmdb.is_some());
         assert!(ratings.metacritic.is_none());
         assert!(ratings.rotten_tomatoes.is_some());
+
+        Ok(())
     }
 
     #[test]

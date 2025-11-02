@@ -42,7 +42,7 @@
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [-] 3. Create database schema and migrations
+- [x] 3. Create database schema and migrations
   - [x] 3.1 Create Movies table migration
     - Define all columns matching C# schema
     - Add foreign key to MovieMetadata
@@ -57,7 +57,7 @@
     - Create PostgreSQL variants of table definitions
     - Handle type differences (INTEGER vs SERIAL)
     - _Requirements: 5.3_
-  - [-] 3.4 Merge task to rust branch
+  - [x] 3.4 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch
