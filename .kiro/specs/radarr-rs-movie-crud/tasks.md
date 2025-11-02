@@ -63,52 +63,52 @@
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [ ] 4. Implement repository layer
-  - [ ] 4.1 Define MovieRepository trait
+- [-] 4. Implement repository layer
+  - [x] 4.1 Define MovieRepository trait
     - Define get, find, all methods
     - Define insert, update, delete methods
     - Define find_by_tmdb_id, find_by_imdb_id, find_by_path methods
     - Define bulk operation methods
     - Define query methods (all_movie_paths, all_movie_tmdb_ids)
     - _Requirements: 1.1, 2.1, 3.1, 4.1, 6.1, 6.2, 6.3_
-  - [ ] 4.2 Implement SqlxMovieRepository for SQLite
+  - [x] 4.2 Implement SqlxMovieRepository for SQLite
     - Implement get method with metadata loading
     - Implement find method returning Option
     - Implement all method with efficient metadata loading
     - Handle RowNotFound error mapping to NotFound
     - _Requirements: 1.1, 1.6, 5.3_
-  - [ ] 4.3 Implement insert operation
+  - [x] 4.3 Implement insert operation
     - Build parameterized INSERT query
     - Handle JSON serialization for Tags field
     - Return inserted movie with generated ID
     - Use RETURNING clause for PostgreSQL, last_insert_rowid for SQLite
     - _Requirements: 2.1, 5.5_
-  - [ ] 4.4 Implement update operation
+  - [x] 4.4 Implement update operation
     - Build parameterized UPDATE query
     - Handle JSON serialization for Tags field
     - Return updated movie
     - _Requirements: 3.1, 5.5_
-  - [ ] 4.5 Implement delete operation
+  - [x] 4.5 Implement delete operation
     - Execute DELETE query by ID
     - Return unit result
     - _Requirements: 4.1_
-  - [ ] 4.6 Implement lookup methods
+  - [x] 4.6 Implement lookup methods
     - Implement find_by_tmdb_id with JOIN to MovieMetadata
     - Implement find_by_imdb_id with JOIN to MovieMetadata
     - Implement find_by_path with exact match
     - Implement find_by_titles with CleanTitle matching
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
-  - [ ] 4.7 Implement bulk operations
+  - [x] 4.7 Implement bulk operations
     - Implement insert_many with transaction
     - Implement update_many with transaction
     - Implement delete_many with IN clause
     - _Requirements: 9.1, 9.2, 9.3, 9.4_
-  - [ ] 4.8 Add PostgreSQL support
+  - [x] 4.8 Add PostgreSQL support
     - Create PostgreSQL-specific query variants
     - Handle type differences in queries
     - Test with PostgreSQL database
     - _Requirements: 5.3_
-  - [ ] 4.9 Merge task to rust branch
+  - [-] 4.9 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch
