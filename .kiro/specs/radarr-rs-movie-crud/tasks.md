@@ -52,6 +52,11 @@
     - Create PostgreSQL variants of table definitions
     - Handle type differences (INTEGER vs SERIAL)
     - _Requirements: 5.3_
+  - [ ] 3.4 Merge task to rust branch
+    - Run all quality checks (fmt, clippy, tests)
+    - Merge feature branch to rust using --squash
+    - Delete feature branch
+    - _Requirements: All task requirements_
 
 - [ ] 4. Implement repository layer
   - [ ] 4.1 Define MovieRepository trait
@@ -98,6 +103,11 @@
     - Handle type differences in queries
     - Test with PostgreSQL database
     - _Requirements: 5.3_
+  - [ ] 4.9 Merge task to rust branch
+    - Run all quality checks (fmt, clippy, tests)
+    - Merge feature branch to rust using --squash
+    - Delete feature branch
+    - _Requirements: All task requirements_
 
 - [ ] 5. Implement service layer
   - [ ] 5.1 Create MovieService struct
@@ -135,6 +145,11 @@
     - Implement find_by_imdb_id calling repository
     - Implement find_by_path calling repository
     - _Requirements: 6.1, 6.2, 6.3_
+  - [ ] 5.8 Merge task to rust branch
+    - Run all quality checks (fmt, clippy, tests)
+    - Merge feature branch to rust using --squash
+    - Delete feature branch
+    - _Requirements: All task requirements_
 
 - [ ] 6. Implement API resource layer
   - [ ] 6.1 Create MovieResource struct
