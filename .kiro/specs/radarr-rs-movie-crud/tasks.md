@@ -261,7 +261,7 @@
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [-] 9. Configure routing and application
+- [x] 9. Configure routing and application
   - [x] 9.1 Create movie_routes function
     - Define GET /api/v3/movie route
     - Define POST /api/v3/movie route
@@ -282,7 +282,7 @@
     - Build router with state
     - Start HTTP server
     - _Requirements: 5.3, 9.4, 9.5_
-  - [-] 9.4 Merge task to rust branch
+  - [x] 9.4 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch

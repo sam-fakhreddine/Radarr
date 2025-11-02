@@ -46,10 +46,12 @@ pub struct MovieCollection {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MovieResource {
-    /// Unique identifier
+    /// Unique identifier (0 for new movies)
+    #[serde(default)]
     pub id: i32,
 
     /// Movie title
+    #[serde(default)]
     pub title: String,
 
     /// Original title (in original language)
@@ -61,9 +63,11 @@ pub struct MovieResource {
     pub alternative_titles: Option<Vec<String>>,
 
     /// Release year
+    #[serde(default)]
     pub year: i32,
 
     /// The Movie Database (TMDB) ID
+    #[serde(default)]
     pub tmdb_id: i32,
 
     /// Internet Movie Database (IMDB) ID
@@ -71,6 +75,7 @@ pub struct MovieResource {
     pub imdb_id: Option<String>,
 
     /// File system path where movie is/will be stored
+    #[serde(default)]
     pub path: String,
 
     /// Root folder path (used during creation)
@@ -78,15 +83,19 @@ pub struct MovieResource {
     pub root_folder_path: Option<String>,
 
     /// Quality profile ID for this movie
+    #[serde(default)]
     pub quality_profile_id: i32,
 
     /// Whether the movie is being monitored for downloads
+    #[serde(default)]
     pub monitored: bool,
 
     /// Minimum availability required before searching
+    #[serde(default)]
     pub minimum_availability: MovieStatusType,
 
     /// Whether the movie is available for download
+    #[serde(default)]
     pub is_available: bool,
 
     /// Whether the movie has an associated file
@@ -94,9 +103,11 @@ pub struct MovieResource {
     pub has_file: Option<bool>,
 
     /// Foreign key to `MovieFile` (0 if no file)
+    #[serde(default)]
     pub movie_file_id: i32,
 
     /// Current status of the movie
+    #[serde(default)]
     pub status: MovieStatusType,
 
     /// Movie overview/synopsis
@@ -104,15 +115,19 @@ pub struct MovieResource {
     pub overview: Option<String>,
 
     /// Images (posters, fanart, etc.)
+    #[serde(default)]
     pub images: Vec<MediaCover>,
 
     /// List of genres
+    #[serde(default)]
     pub genres: Vec<String>,
 
     /// Ratings from various sources
+    #[serde(default)]
     pub ratings: Ratings,
 
     /// Runtime in minutes
+    #[serde(default)]
     pub runtime: i32,
 
     /// Date movie was/will be in cinemas
@@ -144,9 +159,11 @@ pub struct MovieResource {
     pub studio: Option<String>,
 
     /// Tags associated with this movie
+    #[serde(default)]
     pub tags: Vec<i32>,
 
     /// Timestamp when movie was added to library
+    #[serde(default = "chrono::Utc::now")]
     pub added: DateTime<Utc>,
 
     /// Additional options used when adding the movie
