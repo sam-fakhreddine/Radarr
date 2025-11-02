@@ -6,7 +6,7 @@ MOVIE_ID=${1:-1}
 echo "Testing PUT /api/v3/movie/$MOVIE_ID..."
 echo ""
 
-curl -s -X PUT http://localhost:7879/api/v3/movie/$MOVIE_ID \
+curl -s -X PUT http://localhost:7878/api/v3/movie/$MOVIE_ID \
   -H "Content-Type: application/json" \
   -d '{
     "id": '$MOVIE_ID',

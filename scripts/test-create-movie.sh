@@ -4,7 +4,7 @@
 echo "Testing POST /api/v3/movie..."
 echo ""
 
-curl -s -X POST http://localhost:7879/api/v3/movie \
+curl -s -X POST http://localhost:7878/api/v3/movie \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Inception",

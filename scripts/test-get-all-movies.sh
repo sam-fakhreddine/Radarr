@@ -4,7 +4,7 @@
 echo "Testing GET /api/v3/movie..."
 echo ""
 
-curl -s http://localhost:7879/api/v3/movie | jq '.'
+curl -s http://localhost:7878/api/v3/movie | jq '.'
 
 echo ""
 echo "Done!"

@@ -8,7 +8,7 @@ ADD_EXCLUSION=${3:-false}
 echo "Testing DELETE /api/v3/movie/$MOVIE_ID?deleteFiles=$DELETE_FILES&addImportExclusion=$ADD_EXCLUSION..."
 echo ""
 
-curl -s -X DELETE "http://localhost:7879/api/v3/movie/$MOVIE_ID?deleteFiles=$DELETE_FILES&addImportExclusion=$ADD_EXCLUSION" \
+curl -s -X DELETE "http://localhost:7878/api/v3/movie/$MOVIE_ID?deleteFiles=$DELETE_FILES&addImportExclusion=$ADD_EXCLUSION" \
   -w "\nHTTP Status: %{http_code}\n"
 
 echo ""

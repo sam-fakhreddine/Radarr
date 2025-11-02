@@ -4,7 +4,7 @@ Shell scripts for testing the Radarr API endpoints.
 
 ## Prerequisites
 
-- Server running on `http://localhost:7879`
+- Server running on `http://localhost:7878`
 - `curl` installed
 - `jq` installed (for JSON formatting)
 - `sqlite3` installed (for seeding data)
@@ -161,7 +161,7 @@ The service will create both the metadata and the movie.
 ### Server Not Running
 ```bash
 # Check if server is running
-curl http://localhost:7879/api/v3/movie
+curl http://localhost:7878/api/v3/movie
 
 # If not, start it
 cargo run --release

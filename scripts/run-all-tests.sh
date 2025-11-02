@@ -9,8 +9,8 @@ echo "========================================="
 echo ""
 
 # Check if server is running
-if ! curl -s http://localhost:7879/api/v3/movie > /dev/null 2>&1; then
-    echo "❌ Server is not running on port 7879"
+if ! curl -s http://localhost:7878/api/v3/movie > /dev/null 2>&1; then
+    echo "❌ Server is not running on port 7878"
     echo "Please start the server first: cargo run --release"
     exit 1
 fi

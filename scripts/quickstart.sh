@@ -28,7 +28,7 @@ echo ""
 # Wait for server to be ready
 echo "Waiting for server to be ready..."
 for i in {1..30}; do
-    if curl -s http://localhost:7879/api/v3/movie > /dev/null 2>&1; then
+    if curl -s http://localhost:7878/api/v3/movie > /dev/null 2>&1; then
         echo "✅ Server is ready!"
         break
     fi
