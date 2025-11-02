@@ -228,7 +228,7 @@
     - Delete feature branch
     - _Requirements: All task requirements_
 
-- [-] 8. Implement error handling
+- [x] 8. Implement error handling
   - [x] 8.1 Create Error enum
     - Define NotFound variant
     - Define Validation variant
@@ -255,7 +255,7 @@
     - Validate quality profile exists
     - Return descriptive error messages
     - _Requirements: 10.4, 10.5_
-  - [-] 8.5 Merge task to rust branch
+  - [x] 8.5 Merge task to rust branch
     - Run all quality checks (fmt, clippy, tests)
     - Merge feature branch to rust using --squash
     - Delete feature branch
