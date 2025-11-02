@@ -134,6 +134,7 @@ bin
 obj
 output/*
 
+liveData
 # .NET Core
 project.lock.json
 project.fragment.lock.json
@@ -174,3 +175,16 @@ node_modules.nosync
 
 # Ignore Jetbrains IntelliJ Workspace Directories
 .idea/
+
+# Rust
+target/
+Cargo.lock
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+radarr.db*
+
+liveData/*
+

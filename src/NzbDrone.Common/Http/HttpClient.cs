@@ -41,6 +41,8 @@ namespace NzbDrone.Common.Http
     public class HttpClient : IHttpClient
     {
         private const int MaxRedirects = 5;
+        private const int MaxRetries = 3;
+        private const int BaseRetryDelayMs = 1000;
 
         private readonly Logger _logger;
         private readonly IRateLimitService _rateLimitService;
@@ -67,7 +69,7 @@ namespace NzbDrone.Common.Http
         {
             var cookieContainer = InitializeRequestCookies(request);
 
-            var response = await ExecuteRequestAsync(request, cookieContainer);
+            var response = await ExecuteRequestWithRetryAsync(request, cookieContainer);
 
             if (request.AllowAutoRedirect && response.HasHttpRedirect)
             {
@@ -93,7 +95,7 @@ namespace NzbDrone.Common.Http
                         request.ContentSummary = null;
                     }
 
-                    response = await ExecuteRequestAsync(request, cookieContainer);
+                    response = await ExecuteRequestWithRetryAsync(request, cookieContainer);
                 }
                 while (response.HasHttpRedirect);
             }
@@ -136,6 +138,26 @@ namespace NzbDrone.Common.Http
                 HttpStatusCode.SeeOther => requestMethod != HttpMethod.Get && requestMethod != HttpMethod.Head,
                 _ => false,
             };
+        }
+
+        private async Task<HttpResponse> ExecuteRequestWithRetryAsync(HttpRequest request, CookieContainer cookieContainer)
+        {
+            for (var attempt = 0; attempt <= MaxRetries; attempt++)
+            {
+                var response = await ExecuteRequestAsync(request, cookieContainer);
+
+                if ((int)response.StatusCode == 503 && attempt < MaxRetries)
+                {
+                    var delay = BaseRetryDelayMs * (int)Math.Pow(2, attempt);
+                    _logger.Debug("Request throttled (503), retrying in {0}ms (attempt {1}/{2})", delay, attempt + 1, MaxRetries);
+                    await Task.Delay(delay);
+                    continue;
+                }
+
+                return response;
+            }
+
+            return await ExecuteRequestAsync(request, cookieContainer);
         }
 
         private async Task<HttpResponse> ExecuteRequestAsync(HttpRequest request, CookieContainer cookieContainer)

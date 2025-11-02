@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Datastore
                 JournalMode = OsInfo.IsOsx ? SQLiteJournalModeEnum.Truncate : SQLiteJournalModeEnum.Wal,
                 Pooling = true,
                 Version = 3,
-                BusyTimeout = 100
+                BusyTimeout = 5000
             };
 
             if (OsInfo.IsOsx)
@@ -69,7 +69,12 @@ namespace NzbDrone.Core.Datastore
                 Username = _configFileProvider.PostgresUser,
                 Password = _configFileProvider.PostgresPassword,
                 Port = _configFileProvider.PostgresPort,
-                Enlist = false
+                Enlist = false,
+                Pooling = true,
+                MinPoolSize = 2,
+                MaxPoolSize = 20,
+                ConnectionIdleLifetime = 300,
+                ConnectionPruningInterval = 10
             };
 
             return new DatabaseConnectionInfo(DatabaseType.PostgreSQL, connectionBuilder.ConnectionString);
