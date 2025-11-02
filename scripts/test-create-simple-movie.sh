@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test POST /api/v3/movie - Create a simple movie with minimal data
+# Test POST /api/v3/movie - Create a simple movie (minimal fields)
 
 echo "Testing POST /api/v3/movie (simple)..."
 echo ""
@@ -9,7 +9,7 @@ curl -s -X POST http://localhost:7878/api/v3/movie \
   -d '{
     "title": "Test Movie",
     "year": 2024,
-    "tmdbId": 999999,
+    "tmdbId": 99999,
     "path": "/movies/Test Movie (2024)",
     "qualityProfileId": 1,
     "monitored": true,
