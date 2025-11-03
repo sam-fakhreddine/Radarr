@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  radarr-telemetry:
+    build:
+      context: .
+      dockerfile: Dockerfile.custom
+    container_name: radarr-telemetry
+    restart: always
+    ports:
+      - 7878:7878
+    volumes:
+      - /mediapool/docker/docker/plex/radarr/config:/config
+      - mediapool:/media
+      - usenetsab:/downloads
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: ${timezone}
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 512m
+    entrypoint: /bin/sh -c "mkdir -p /mnt/bigshare; ln -s /media/Movies /mnt/bigshare || true; exec /init"
+
+volumes:
+  mediapool:
+    external: true
+  usenetsab:
+    external: true

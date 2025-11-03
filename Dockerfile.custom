@@ -1,0 +1,20 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS builder
+
+WORKDIR /src
+COPY . .
+
+# Build backend
+RUN dotnet publish src/Radarr.sln -c Release -o /app
+
+# Build frontend
+RUN apt-get update && apt-get install -y nodejs npm && \
+    npm install -g yarn && \
+    cd frontend && yarn install && yarn build
+
+FROM lscr.io/linuxserver/radarr:latest
+
+# Copy custom build over the default
+COPY --from=builder /app /app/radarr/bin
+COPY --from=builder /src/_output/UI /app/radarr/bin/UI
+
+# Keep LinuxServer's entrypoint and init system
